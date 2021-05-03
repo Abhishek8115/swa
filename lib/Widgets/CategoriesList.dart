@@ -2,45 +2,41 @@ import 'package:flutter/material.dart';
 
 class CategoriesList extends StatefulWidget {
 
-  List<String> categories;
-  CategoriesList(List<String> categories)
-  {
-    this.categories = categories;
-  }
+  List categories;
+  CategoriesList({Key key, this.categories}): super(key:key);
+ 
   @override
-  State<StatefulWidget> createState() => _CategoriesListState(categories);
+  State<StatefulWidget> createState() => _CategoriesListState();
 }
 Size size;
 int selectedIndex;
 class _CategoriesListState extends State<CategoriesList> {
 
-  List<String> categories;
-  _CategoriesListState(List<String> categories)
-  {
-    this.categories = categories;
-  }
+  
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     selectedIndex = 0;
-    categories = ["Women's Clothing",
-      "Men's Clothing", 
-      "Kid's Wear",
-      "Non-Food",
-      "Cooked Food",
-      "Electronics"
-    ];
+    // categories = ["Women's Clothing",
+    //   "Men's Clothing", 
+    //   "Kid's Wear",
+    //   "Non-Food",
+    //   "Cooked Food",
+    //   "Electronics"
+    // ];
   }
   @override
   Widget build(BuildContext context) {
+    print(widget.categories);
+    print(widget.categories.length);
     size = MediaQuery.of(context).size;
     return SizedBox(
       height: 50,
           child: ListView.builder(
         shrinkWrap: true,
         scrollDirection: Axis.horizontal,
-        itemCount: categories.length,
+        itemCount: widget.categories==null?0:widget.categories.length,
         itemBuilder: (BuildContext context, index){
           return Padding(
             padding:  EdgeInsets.fromLTRB(0, size.height*0.01,size.width*0.02,size.height*0.005),
@@ -65,7 +61,7 @@ class _CategoriesListState extends State<CategoriesList> {
                 ),
                 child: Padding(
                   padding: EdgeInsets.all(size.height*0.01),
-                  child: Center(child: Text(categories[index])),
+                  child: Center(child: Text(widget.categories[index]['name'])),
                 ),
               ),
             ),

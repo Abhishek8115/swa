@@ -1,352 +1,569 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:swap/Screens/ChatScreen.dart';
-import 'package:swap/Screens/UserScreens/AddItemsDonate.dart';
-import 'package:swap/Screens/UserScreens/AddItemsFlashSale.dart';
-import 'package:swap/Screens/UserScreens/AddItemsFriendly.dart';
-import 'package:swap/Screens/UserScreens/MyPost.dart';
-import 'package:swap/Screens/bartering.dart';
+import 'package:swap/Screens/UserScreens/UserOrders.dart';
+import 'package:swap/Screens/BusinessScreens/BusinessSupport.dart';
+import 'package:swap/Screens/BusinessScreens/ChatPage.dart';
+import 'package:swap/Screens/UserScreens/MyPostUser.dart';
+import 'package:swap/Screens/BusinessScreens/Wallet.dart';
+import 'package:swap/Screens/UserScreens/UserAddItems.dart';
+import 'package:swap/Screens/BusinessScreens/ShopRoutine.dart';
+import 'package:swap/Screens/UserScreens/userFlashSale.dart';
+import 'package:swap/Widgets/CategoriesList.dart';
+import 'package:swap/Screens/Cart.dart';
 import 'package:swap/Screens/donate.dart';
 import 'package:swap/Screens/fresh_sale.dart';
-import 'package:swap/Screens/friendly.dart';
-import 'package:swap/Widgets/CategoriesList.dart';
 import 'package:swap/SplashScreen.dart';
-import 'package:swap/Screens/UserScreens/EditProfile.dart';
-import 'userItemDetails.dart';
+import 'package:swap/Models/DataSchema.dart';
+//import 'BusinessEditProfile.dart';
+import 'dart:io';
+import 'package:swap/global.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
+import 'package:swap/Screens/loginScreen.dart';
 
 class UserDashboard extends StatefulWidget {
   @override
   _UserDashboardState createState() => _UserDashboardState();
 }
-
+List productList = [];
+List catList = [];
 class _UserDashboardState extends State<UserDashboard> {
-
-
+  bool loaderFlag = false;
+  bool productFlag = false;
+  Map<String, dynamic> userInfo;
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-  List<String> dummy;
+  Size size ; 
+  int itemCount = 5;
+  @override
+  void initState() {
+    // TODO: implement initState
+    loadUserDetails();
+    loadProductDetails();
+    super.initState();
+
+  }
+  void loadUserDetails()async
+  {
+    Directory directory = await getApplicationDocumentsDirectory(); 
+    File file2 = File('${directory.path}/userId.txt');
+    File file3 = File('${directory.path}/token.txt');
+    showGeneralDialog(
+      barrierColor: Colors.black.withOpacity(0.5),
+      transitionBuilder: (context, a1, a2, widget) {
+        return Transform.scale(
+          scale: a1.value,
+          child: Opacity(
+            opacity: a1.value,
+            child: AlertDialog(
+            title:Row( 
+              children:<Widget>[
+                CircularProgressIndicator(
+                  backgroundColor: Colors.indigo, 
+                  //valueColor: _animationController.drive(ColorTween(begin: Colors.indigo, end: Colors.deepPurple[100])),                  
+                  strokeWidth: 6.0,
+                ),
+                SizedBox(width: size.width*0.1),
+                Text("Loading")
+              ]
+            )
+          ),
+          ),
+        );
+      },
+      transitionDuration: Duration(milliseconds: 300),
+      barrierDismissible: false,
+      barrierLabel: '',
+      context: context,
+      pageBuilder: (context, animation1, animation2) {}
+    );
+    String userId = await file2.readAsString();
+    String token = await file3.readAsString();
+    print(token);
+    print(userId);
+    http.Response response = await http.get(
+      "${path}/profile/${userId}",
+      headers: {
+        "Content-Type":"application/json",
+        "Accept":"application/json",
+        "Authorization":"Bearer $token"
+      }  
+    );
+    userInfo = jsonDecode(response.body);
+    //print(userInfo);
+    Navigator.pop(context);
+    loaderFlag = true;
+    setState(() {});
+  }
+  void loadProductDetails()async
+  {
+    // showGeneralDialog(
+    //   barrierColor: Colors.black.withOpacity(0.5),
+    //   transitionBuilder: (context, a1, a2, widget) {
+    //     return Transform.scale(
+    //       scale: a1.value,
+    //       child: Opacity(
+    //         opacity: a1.value,
+    //         child: AlertDialog(
+    //         title:Row( 
+    //           children:<Widget>[
+    //             CircularProgressIndicator(
+    //               backgroundColor: Colors.blue[100], 
+    //               //valueColor: _animationController.drive(ColorTween(begin: Colors.indigo, end: Colors.deepPurple[100])),                  
+    //               strokeWidth: 6.0,
+    //             ),
+    //             SizedBox(width: size.width*0.1),
+    //             Text("Loading")
+    //           ]
+    //         )
+    //       ),
+    //       ),
+    //     );
+    //   },
+    //   transitionDuration: Duration(milliseconds: 300),
+    //   barrierDismissible: false,
+    //   barrierLabel: '',
+    //   context: context,
+    //   pageBuilder: (context, animation1, animation2) {}
+    // );
+   http.Response  response = await http.get('$path/product',);
+   
+   
+  //  Navigator.pop(context);
+  //  Navigator.pop(context);
+  //  Navigator.pop(context);
+    Map<String, dynamic> prodlst = jsonDecode(response.body);
+    print(prodlst['data']['products']);
+    productList = prodlst['data']['products'];
+    http.Response  result = await http.get('$path/category',);   
+    Map<dynamic, dynamic> catlst = jsonDecode(result.body);
+    print('getData called');
+    print(catlst['data']['categories']);
+    catList = catlst['data']['categories'];
+  // productList = jsonDecode(t2);
+  // print("String t2 : $t2");
+    print("about to crash");
+    // List productList = prodlst['data']['products'] as List;
+    print(productList.length);
+    // for(var i in productList)
+    //   print(i);
+    if(productList.length!=0)
+    { 
+      productFlag = true;
+      print("Everyting loaded");
+      //Navigator.pop(context);
+       //Navigator.pop(context);
+      setState(() {      
+      });
+    }
+    else
+    {
+      List productList = prodlst['data']['products'] as List;
+      print(productList.length);
+    }
+    //print("map productList : $productList");
+   //print("printing productList : $t");
+   //print("printing productList : $productList");
+  }
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
+    size = MediaQuery.of(context).size;
     return Scaffold(
       key: _scaffoldKey,
       drawer: Drawer(
           child: ListView(
+        children: [
+          SizedBox(
+            height: 30,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              SizedBox(
-                height: 30,
+              CircleAvatar(
+                radius: 30.0,
+                //backgroundImage: Image.asset('user.png'),
+                backgroundColor: Colors.transparent,
+                child: Image.asset('assets/user.png'),
               ),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              loaderFlag?Column(
                 children: [
-
-                  CircleAvatar(
-                    radius: 30.0,
-                    //backgroundImage: Image.asset('user.png'),
-                    backgroundColor: Colors.transparent,
-                    child: Image.asset('assets/user.png'),
+                  Text(
+                    userInfo['data']['profile']['name'],
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18),
                   ),
-
-                  Column(
-                    children: [
-                      Text("Name" , style: TextStyle(color: Colors.black , fontWeight: FontWeight.bold , fontSize: 18),),
-                      Text("User" , style: TextStyle(color: Colors.grey , fontWeight: FontWeight.normal , fontSize: 16),)
-                    ],
+                  Text(
+                    userInfo['data']['profile']['role'],
+                    style: TextStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.normal,
+                        fontSize: 16),
                   )
-
-
                 ],
-              ),
-              SizedBox(height: 10,),
-              InkWell(
-                onTap: (){
-                  Navigator.push(context, MaterialPageRoute(builder: (context) =>EditProfile()));
-                },
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 0, 0,0),
-                  child: ListTile(
-                    leading: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: 30,
-                        maxHeight: 30,
-                      ),
-                      child: Icon(Icons.mode_edit),
-                    ),
-                    title: Text("Edit Profile"),
-                  ),
-                ),
-              ),
-              InkWell(
-                onTap: (){
-                  Navigator.push(context, MaterialPageRoute(builder: (context) =>MyPosts_User()));
-                },
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 0, 0,0),
-                  child: ListTile(
-                    leading: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: 30,
-                        maxHeight: 30,
-                      ),
-                      child: Image.asset("assets/myposts.png", fit: BoxFit.cover),
-                    ),
-                    title: Text("My Posts"),
-                  ),
-                ),
-              ),
-              
-              ListTile(
-                onTap: (){
-                  //Navigator.push(context, MaterialPageRoute(builder: (context)=> EditPost()));
-                  showModalBottomSheet(
-                    context: context,
-                    builder: (BuildContext bc) {
-                      return SafeArea(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            //borderRadius: BorderRadius.circular(100),
-                            shape: BoxShape.circle
-                          ),
-                          child: new Wrap(
-                            children: <Widget>[
-                              new ListTile(
-                                selectedTileColor: Colors.purple[100],
-                                focusColor: Colors.purple[100],
-                                  //leading: new Icon(Icons.giv),
-                                  title: new Text('Donate', style : TextStyle(fontWeight: FontWeight.w600)),
-                                  onTap: () {
-                                    //_imgFromGallery();
-                                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>AddItemsDonate()));
-                                  }),
-                                new ListTile(
-                                //leading: new Icon(Icons.),
-                                title: new Text('Friendly', style : TextStyle(fontWeight: FontWeight.w600)),
-                                onTap: () {
-                                  //_imgFromGallery();
-                                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>AddItemsFriendly()));
-                                }),
-                              new ListTile(
-                                //leading: new Icon(Icons.photo_camera),
-                                title: new Text('Flash Sale', style : TextStyle(fontWeight: FontWeight.w600)),
-                                onTap: () {
-                                  //_imgFromCamera();
-                                 Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>AddItemsFlashSale()));
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    }
-                );
-                },
-                title: Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 10,0),
-                  child: ListTile(
-                    leading: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: 30,
-                        maxHeight: 30,
-                      ),
-                      child: Icon(Icons.add_circle_sharp),
-                    ),
-                    title: Text("Add Item"),
-                  ),
-                ),
-                //children: <Widget>[Text("children 1"), Text("children 2")],
-              ),
-              InkWell(
-                onTap: (){
-
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => ChatPage()));
-
-
-                },
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 0, 0,0),
-                  child: ListTile(
-                    leading: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: 30,
-                        maxHeight: 30,
-                      ),
-                      child: Image.asset("assets/chat.png", fit: BoxFit.cover),
-                    ),
-                    title: Text("Chat"),
-                  ),
-                ),
-              ),
-              InkWell(
-                onTap: (){
-                },
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 0, 0,0),
-                  child: ListTile(
-                    leading: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: 30,
-                        maxHeight: 30,
-                      ),
-                      child: Image.asset("assets/bell.png", fit: BoxFit.cover),
-                    ),
-                    title: Text("Notifications"),
-                  ),
-                ),
-              ),
-
-
-              InkWell(
-                onTap: (){
-
-                },
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 0, 0,0),
-                  child: ListTile(
-                    leading: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: 30,
-                        maxHeight: 30,
-                      ),
-                      child: Image.asset("assets/support.png", fit: BoxFit.cover),
-                    ),
-                    title: Text("Support"),
-                  ),
-                ),
-              ),
-              InkWell(
-                onTap: (){
-
-                },
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 0, 0,0),
-                  child: ListTile(
-                    leading: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: 30,
-                        maxHeight: 30,
-                      ),
-                      child: Image.asset("assets/faq.png", fit: BoxFit.cover),
-                    ),
-                    title: Text("FAQ"),
-                  ),
-                ),
-              ),
-              InkWell(
-                onTap: (){
-
-
-                },
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 0, 0,0),
-                  child: ListTile(
-                    leading: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: 30,
-                        maxHeight: 30,
-                      ),
-                      child: Image.asset("assets/wallet.png", fit: BoxFit.cover),
-                    ),
-                    title: Text("My Wallet"),
-                  ),
-                ),
-              ),
-              ExpansionTile(
-                title: Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 10,0),
-                  child: ListTile(
-                    leading: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: 30,
-                        maxHeight: 30,
-                      ),
-                      child: Image.asset("assets/category.png", fit: BoxFit.cover),
-                    ),
-                    title: Text("More"),
-                  ),
-                ),
-                children: <Widget>[
-                  InkWell(
-                onTap: (){
-                  Navigator.push(context, MaterialPageRoute(builder: (context) =>MyPosts_User()));
-                },
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 0,0),
-                  child: ListTile(
-                    leading: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: 230,
-                        maxHeight: 30,
-                      ),
-                      //child: Image.asset("assets/myposts.png", fit: BoxFit.cover),
-                    ),
-                    title: Text("Service Rules"),
-                  ),
-                ),
-              ),
-              InkWell(
-                onTap: (){
-                  Navigator.push(context, MaterialPageRoute(builder: (context) =>MyPosts_User()));
-                },
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 0,0),
-                  child: ListTile(
-                    leading: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: 30,
-                        maxHeight: 30,
-                      ),
-                      //child: Image.asset("assets/myposts.png", fit: BoxFit.cover),
-                    ),
-                    title: Text("LIcence agreement"),
-                  ),
-                ),
-              ),
-              InkWell(
-                onTap: (){
-                  Navigator.push(context, MaterialPageRoute(builder: (context) =>MyPosts_User()));
-                },
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 0,0),
-                  child: ListTile(
-                    leading: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: 30,
-                        maxHeight: 30,
-                      ),
-                      //child: Image.asset("assets/myposts.png", fit: BoxFit.cover),
-                    ),
-                    title: Text("Privacy Policy"),
-                  ),
-                ),
-              ),
-                  ],
-              ),
-              InkWell(
-                onTap: (){
-
-                  Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => Splash()), (Route<dynamic> route) => false);
-
-
-
-                },
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 0, 0,0),
-                  child: ListTile(
-                    leading: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: 30,
-                        maxHeight: 30,
-                      ),
-                      child: Image.asset("assets/logout2.png", fit: BoxFit.cover),
-                    ),
-                    title: Text("Logout"),
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 20,)
-
+              ):
+              Text("Loading...", style:TextStyle(color: Colors.black54))
             ],
-          )),
+          ),
+
+          SizedBox(
+            height: 25,
+          ),
+
+          // InkWell(
+          //   onTap: (){
+          //
+          //
+          //   },
+          //   child: Padding(
+          //     padding: const EdgeInsets.fromLTRB(10, 10, 0,0),
+          //     child: ListTile(
+          //       leading: ConstrainedBox(
+          //         constraints: BoxConstraints(
+          //           maxWidth: 30,
+          //           maxHeight: 30,
+          //         ),
+          //         child: Image.asset("assets/home.png", fit: BoxFit.cover),
+          //       ),
+          //       title: Text("Home"),
+          //     ),
+          //   ),
+          // ),
+
+          ListTile(
+            onTap: (){
+              Navigator.push(context, MaterialPageRoute(builder: (context)=> EditPost()));
+            //   showModalBottomSheet(
+            //     context: context,
+            //     builder: (BuildContext bc) {
+            //       return SafeArea(
+            //         child: Container(
+            //           child: new Wrap(
+            //             children: <Widget>[
+            //               new ListTile(
+            //                   //leading: new Icon(Icons.giv),
+            //                   title: new Text('Donate'),
+            //                   onTap: () {
+            //                     //_imgFromGallery();
+            //                     Navigator.of(context).pop();
+            //                   }),
+            // 
+            //               new ListTile(
+            //                 //leading: new Icon(Icons.photo_camera),
+            //                 title: new Text('Flash Sale'),
+            //                 onTap: () {
+            //                   //_imgFromCamera();
+            //                   Navigator.of(context).pop();
+            //                 },
+            //               ),
+            //             ],
+            //           ),
+            //         ),
+            //       );
+            //     }
+            // );
+            },
+            title: Padding(
+              padding: const EdgeInsets.fromLTRB(0, 0, 10,0),
+              child: ListTile(
+                leading: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: 30,
+                    maxHeight: 30,
+                  ),
+                  child: Image.asset("assets/category.png", fit: BoxFit.cover),
+                ),
+                title: Text("Add Item"),
+              ),
+            ),
+            //children: <Widget>[Text("children 1"), Text("children 2")],
+          ),
+
+          InkWell(
+            onTap: () {
+              // print(productList);
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => MyPosts_User(pl: productList, catList: catList)));
+            },
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+              child: ListTile(
+                leading: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: 30,
+                    maxHeight: 30,
+                  ),
+                  child:
+                      Image.asset("assets/myposts.png", fit: BoxFit.cover),
+                ),
+                title: Text("My Posts"),
+              ),
+            ),
+          ),
+            InkWell(
+            onTap: (){
+              //Navigator.push(context, MaterialPageRoute(builder: (context) =>BusinessEditProfile()));
+            },
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(10, 0, 0,0),
+              child: ListTile(
+                leading: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: 30,
+                    maxHeight: 30,
+                  ),
+                  child: Icon(Icons.mode_edit),
+                ),
+                title: Text("Edit Profile"),
+              ),
+            ),
+          ),
+          InkWell(
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => Business_ChatPage()));
+            },
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+              child: ListTile(
+                leading: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: 30,
+                    maxHeight: 30,
+                  ),
+                  child: Image.asset("assets/chat.png", fit: BoxFit.cover),
+                ),
+                title: Text("Chat"),
+              ),
+            ),
+          ),
+          InkWell(
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => CartScreen()));
+            },
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+              child: ListTile(
+                leading: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: 30,
+                    maxHeight: 30,
+                  ),
+                  child:
+                      Icon(Icons.shopping_cart_outlined, color: Colors.purpleAccent, size: MediaQuery.of(context).size.height*0.04)
+                      //Image.asset("assets/myposts.png", fit: BoxFit.cover),
+                ),
+                title: Text("Cart"),
+              ),
+            ),
+          ),
+
+          // InkWell(
+          //   onTap: (){
+          //
+          //     //Navigator.push(context, MaterialPageRoute(builder: (context) => Profile()));
+          //
+          //
+          //   },
+          //   child: Padding(
+          //     padding: const EdgeInsets.fromLTRB(10, 0, 0,0),
+          //     child: ListTile(
+          //       leading: ConstrainedBox(
+          //         constraints: BoxConstraints(
+          //           maxWidth: 30,
+          //           maxHeight: 30,
+          //         ),
+          //         child: Image.asset("assets/user.png", fit: BoxFit.cover),
+          //       ),
+          //       title: Text("Dashboard"),
+          //     ),
+          //   ),
+          // ),
+
+          // InkWell(
+          //   onTap: () {
+          //     Navigator.push(
+          //         context,
+          //         MaterialPageRoute(
+          //             builder: (context) => Wallet_Business()));
+          //   },
+          //   child: Padding(
+          //     padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+          //     child: ListTile(
+          //       leading: ConstrainedBox(
+          //         constraints: BoxConstraints(
+          //           maxWidth: 30,
+          //           maxHeight: 30,
+          //         ),
+          //         child:
+          //             Image.asset("assets/wallet.png", fit: BoxFit.cover),
+          //       ),
+          //       title: Text("My Wallet"),
+          //     ),
+          //   ),
+          // ),
+
+          InkWell(
+            onTap: () async{
+              Directory directory = await getApplicationDocumentsDirectory();
+              File file3 = File('${directory.path}/token.txt');
+              String token = await file3.readAsString();
+               http.Response response = await http.get(
+                "${path}/user/orders",
+                headers:{
+                  "Authorization":"Bearer $token",
+                }
+              );
+              showGeneralDialog(
+                barrierColor: Colors.black.withOpacity(0.5),
+                transitionBuilder: (context, a1, a2, widget) {
+                  return Transform.scale(
+                    scale: a1.value,
+                    child: Opacity(
+                      opacity: a1.value,
+                      child: AlertDialog(
+                      title:Row( 
+                        children:<Widget>[
+                          CircularProgressIndicator(
+                            backgroundColor: Colors.indigo, 
+                            //valueColor: _animationController.drive(ColorTween(begin: Colors.indigo, end: Colors.deepPurple[100])),                  
+                            strokeWidth: 6.0,
+                          ),
+                          SizedBox(width: size.width*0.1),
+                          Text("Loading")
+                        ]
+                      )
+                    ),
+                    ),
+                  );
+                },
+                transitionDuration: Duration(milliseconds: 300),
+                barrierDismissible: false,
+                barrierLabel: '',
+                context: context,
+                pageBuilder: (context, animation1, animation2) {}
+              );
+              print(response.body);
+              Map<String, dynamic> prodlst = jsonDecode(response.body);
+              List orderList = prodlst['data']['orders'] as List;
+              Navigator.pop(context);
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => User_Orders(orders: orderList)));
+              // Navigator.push(context, MaterialPageRoute(builder: (context) => Parking_Lot_Screen()));
+            },
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+              child: ListTile(
+                leading: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: 30,
+                    maxHeight: 30,
+                  ),
+                  child: Image.asset("assets/bell.png", fit: BoxFit.cover),
+                ),
+                title: Text("Orders"),
+              ),
+            ),
+          ),
+
+          InkWell(
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => Business_Support()));
+            },
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+              child: ListTile(
+                leading: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: 30,
+                    maxHeight: 30,
+                  ),
+                  child:
+                      Image.asset("assets/support.png", fit: BoxFit.cover),
+                ),
+                title: Text("Support"),
+              ),
+            ),
+          ),
+          // InkWell(
+          //   onTap: () {
+          //     Navigator.push(
+          //         context,
+          //         MaterialPageRoute(
+          //             builder: (context) => ShoppingRoutine()));
+          //   },
+          //   child: Padding(
+          //     padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+          //     child: ListTile(
+          //       leading: ConstrainedBox(
+          //         constraints: BoxConstraints(
+          //           maxWidth: 30,
+          //           maxHeight: 30,
+          //         ),
+          //         child:
+          //             Icon(Icons.shop, color: Colors.blue)
+          //       ),
+          //       title: Text("Shop Details"),
+          //     ),
+          //   ),
+          // ),
+          // InkWell(
+          //   onTap: () {},
+          //   child: Padding(
+          //     padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+          //     child: ListTile(
+          //       leading: ConstrainedBox(
+          //         constraints: BoxConstraints(
+          //           maxWidth: 30,
+          //           maxHeight: 30,
+          //         ),
+          //         child: Image.asset("assets/faq.png", fit: BoxFit.cover),
+          //       ),
+          //       title: Text("FAQ"),
+          //     ),
+          //   ),
+          // ),
+
+          InkWell(
+            onTap: () {
+              Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => Splash()),
+                  (Route<dynamic> route) => false);
+            },
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+              child: ListTile(
+                leading: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: 30,
+                    maxHeight: 30,
+                  ),
+                  child:
+                      Image.asset("assets/logout2.png", fit: BoxFit.cover),
+                ),
+                title: Text("Logout"),
+              ),
+            ),
+          ),
+
+          SizedBox(
+            height: 20,
+          )
+        ],
+      )
+      ),
 
       backgroundColor: Color(0xffE9E9E9),
       appBar: AppBar(
@@ -359,225 +576,173 @@ class _UserDashboardState extends State<UserDashboard> {
             color: Colors.black,
           ),
         ),
-        title: Center(
-            child: Text("Menu", style: TextStyle(color: Colors.black))),
+        title: Text("Dashboard", style: TextStyle(color: Colors.black)),
         actions: [
-          IconButton(
-            onPressed: () {
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: new Container(
+              height: 150.0,
+              width: 30.0,
+              child: new GestureDetector(
+                onTap: () {
+                  setState(() {
+                    print("calling setState");
+                  });
+                },
+                child: Stack(
+                  children: <Widget>[
+                    new IconButton(
+                        icon: new Icon(
+                          Icons.shopping_cart,
+                          color: Colors.black,
+                        ),
+                        onPressed: () {
 
-            },
-            icon: Icon(Icons.search),
-            tooltip: 'Search',
-            color: Colors.black,
-            iconSize: 30,
-          ),
+                        }),
+                    itemCount == 0
+                        ? new Container()
+                        : new Positioned(
+                            child: new Stack(
+                            children: <Widget>[
+                              new Icon(Icons.brightness_1,
+                                  size: 20.0, color: Colors.orange.shade500),
+                              new Positioned(
+                                  top: 4.0,
+                                  right: 5.0,
+                                  child: new Center(
+                                    child: new Text(
+                                      itemCount.toString(),
+                                      style: new TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 11.0,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                  )),
+                            ],
+                          )),
+                  ],
+                ),
+              ),
+            ),
+          )
         ],
       ),
-      body: Column(
-      children: <Widget>[
-        CategoriesList(dummy),
-        Expanded(
-          child: Container(
-            //color: Colors.black,
-            padding: EdgeInsets.fromLTRB(size.width*0.00, 0, 0, size.height*0.02),
-            child: GridView.builder(
-              //scrollDirection: ,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisSpacing: size.width*0.02,
-                mainAxisSpacing: 0.0,
-                crossAxisCount: 2,
-                childAspectRatio: 1
-                ),
-              physics: BouncingScrollPhysics(), 
-              itemCount: 7,//data == null ? 0 : data.length,
-              itemBuilder: (BuildContext context, int index) {
-                return Dismissible(
-                  direction: DismissDirection.startToEnd,
-                  background:Container(
-                    color: Colors.red,
-                    child: Align(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          SizedBox(
-                            width: 20,
-                          ),
-                          Icon(
-                            Icons.delete,
-                            color: Colors.white,
-                          ),
-                          Text(
-                            "Delete",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                            ),
-                            textAlign: TextAlign.left,
-                          ),
-                        ],
-                      ),
-                      alignment: Alignment.centerLeft,
-                    ),
+      body: 
+      productFlag?UserFlashSale(pl: productList, catList: catList):
+      Center(
+        child:RefreshIndicator(
+          
+          onRefresh: () async{
+              print("it is called");
+              http.Response  response = await http.get('$path/product',);   
+              Map<String, dynamic> prodlst = jsonDecode(response.body);
+              print(response.body);
+              productList = prodlst['data']['products'] as List;
+              print(productList.length);
+              if(productList.length > 0)
+              {
+                productFlag = true;
+                setState(() {});
+              }
+              // return Future.delayed(
+              //   Duration(seconds: 1),
+              //   () {
+              //       //print("refreshed");
+              //     // showSnackBar(
+              //     //   SnackBar(
+              //     //     content: const Text('Page Refreshed'),
+              //     //   ),
+              //     // );
+              //   },
+              // );
+            },
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: <Widget>[
+              Padding(
+                padding:  EdgeInsets.fromLTRB(size.width*0.15, size.height*0.4, size.width*0.0, size.height*0),
+                child: Text("Nothing added", style: TextStyle(color: Colors.black54, fontSize:size.height*0.05)
                   ),
-                  confirmDismiss: (direction) async {                    
-                      final bool res = await showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              content: Text(
-                                  "Are you sure you want to delete ?"),
-                              actions: <Widget>[
-                                FlatButton(
-                                  child: Text(
-                                    "Cancel",
-                                    style: TextStyle(color: Colors.black),
-                                  ),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
-                                FlatButton(
-                                  child: Text(
-                                    "Delete",
-                                    style: TextStyle(color: Colors.red),
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                     
-                                    });
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
-                              ],
-                            );
-                          });
-                      return res;
-                  },
-                  onDismissed: (direction){print("Deleted");},
-                  key: Key(index.toString()),
-                  child:
-                  InkWell(
-                    onTap: ()=> Navigator.push(context, 
-                      MaterialPageRoute(builder: (context)=>UserItemDetail())),
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(0, size.height*0.01, 0, 0),
-                      child: Container(
-                        //margin: EdgeInsets.fromLTRB(0, 20, 0, 20),
-                        height: size.height*0.4,
-                        width: size.width*0.5,
-                        decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey[300].withOpacity(0.5),
-                            spreadRadius: 5,
-                            blurRadius: 20,
-                            offset: Offset(0, 3), // changes position of shadow
-                          ),
-                        ],
-                        color: Colors.white.withOpacity(0.7),
-                        borderRadius: BorderRadius.circular(20)
-                          ),
-                          child: Column(
-                        children: <Widget>[
-                          Padding(
-                          padding: EdgeInsets.all(MediaQuery.of(context).size.width*0.0),
-                            child: Container(
-                              child: ClipRect(
-                                  
-                                  child: Image.asset('assets/burger.png',
-                                  height: size.height*0.15,
-                                  fit: BoxFit.contain,
-                                  )
-                                // radius: size.height*0.06,
-                                // backgroundImage: AssetImage('assets/burger.png'),
-                            ),
-                            ),
-                            ),
-                            Container(
-                              height: size.height*0.06,
-                              //color: Colors.blue,
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text("Burger ",
-                                maxLines:2,
-                                style: TextStyle(fontSize:14,fontWeight: FontWeight.w500),),
-                              ),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: <Widget>[
-                                Padding(
-                                  padding: EdgeInsets.fromLTRB(size.width*0.1, 0, size.width*0.1, 0),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                    children: <Widget>[
-                                      Text.rich(TextSpan(
-                          text: '\u20b9 200',
-                          style: TextStyle(
-                            color: Colors.grey,
-                            decoration: TextDecoration.lineThrough,
-                          )
-                        ),),
-                        
-                        Text("\u20b9 100", style: TextStyle(
-                          color: Colors.purple,
-                          fontWeight: FontWeight.w600, 
-                          fontSize: size.height*0.02))
-                                    ]
-                                  ),
-                                ),
-                              ],
-                            ),
-                            // SizedBox(
-                            //   height: size.height*0.01
-                            // ),
-                            // Text("Add to Cart", style: TextStyle( fontSize: 15, fontWeight: FontWeight.w500, color: Colors.purple )),
-                            // Padding(
-                            //   padding: const EdgeInsets.all(8.0),
-                            //   child: Text.rich(
-                            //     TextSpan(
-                            //       //text: 'This is item cost',
-                            //       children:<TextSpan>[
-                            //         TextSpan(
-                            //           text: '\u20b9 200',
-                            //           style: TextStyle(
-                            //             color: Colors.grey,
-                            //             decoration: TextDecoration.lineThrough,
-                            //           )
-                            //         ),
-                            //         TextSpan(text: '\u20b9 100')
-                            //       ]
-                            //     )
-                            //   ),
-                            // ),
-                            Column(
-                          children: <Widget>[
-                            
-                            // SizedBox(
-                            //   height: size.height*0.02
-                            // ),
-                            // Container(                          
-                            //   height: size.height*0.05,
-                            //   width: size.width*0.4, 
-                            //   child: Text("This is my last hurrah",
-                            //   overflow:TextOverflow.clip,
-                            //   softWrap: true,style: TextStyle(fontSize:13,color: Colors.black45),),
-                            // )
-                          ],
-                            ),
-                        ],
-                          ),
-                        ),
-                    ),
-                  )
-                  
-                );
-              },
-            ),
+              ),
+            ],
           ),
-        ),
-      ],
-    ),
+        )
+      )          
+      // Column(
+      //   children: [
+      //     SizedBox(
+      //       height: 10,
+      //     ),
+      //     Padding(
+      //       padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+      //       child: Container(
+      //         height: 40,
+      //         color: Color(0xffE9E9E9),
+      //         child:  FreshSale()
+              // TabBar(
+              //     unselectedLabelColor: Color(0xff656565),
+              //     indicator: BoxDecoration(
+              //         borderRadius: BorderRadius.only(
+              //             topRight: Radius.circular(20),
+              //             bottomLeft: Radius.circular(20)),
+              //         color: Color(0xff62319E)),
+              //     tabs: [
+              //       Tab(
+              //         child: Align(
+              //           alignment: Alignment.center,
+              //           child: Text(
+              //             "Flash Sale",
+              //             style: TextStyle(fontSize: 15),
+              //           ),
+              //         ),
+              //       ),
+                    // Tab(
+                    //   child: Align(
+                    //     alignment: Alignment.center,
+                    //     child: Text(
+                    //       "Friendly",
+                    //       style: TextStyle(fontSize: 10),
+                    //     ),
+                    //   ),
+                    // ),
+                    // Tab(
+                    //   child: Align(
+                    //     alignment: Alignment.center,
+                    //     child: Text(
+                    //       "Bartering",
+                    //       style: TextStyle(fontSize: 10),
+                    //     ),
+                    //   ),
+                    // ),
+                    // Tab(
+                    //   child: Align(
+                    //     alignment: Alignment.center,
+                    //     child: Text(
+                    //       "Donate",
+                    //       style: TextStyle(fontSize: 15),
+                    //     ),
+                    //   ),
+                    // ),
+                  //]),
+          //   ),
+          // ),
+          // Expanded(
+          //   flex: 1,
+          //   child: TabBarView(
+          //     // Tab Bar View
+          //     physics: BouncingScrollPhysics(),
+
+          //     children: <Widget>[
+          //       FreshSale(),
+          //       //Friendly(),
+          //       //Bartering(),
+          //       //Donate(),
+          //       //Donate()
+          //     ],
+          //   ),
+          // ),
+      //   ],
+      // ),
       // floatingActionButton: FloatingActionButton(
       //   backgroundColor: Color(0xff62319E),
       //   foregroundColor: Color(0xff62319E),

@@ -1,223 +1,264 @@
+import 'dart:convert';
+import 'package:swap/Screens/BusinessScreens/ownerItemDetails.dart';
+import 'package:swap/Widgets/CategoriesList.dart';
 import 'package:flutter/material.dart';
-import 'package:swap/Screens/BusinessScreens/AddItems.dart';
-import 'package:swap/Screens/BusinessScreens/AddPost.dart';
-import 'package:swap/Screens/EditSpace.dart';
+import 'package:flutter/rendering.dart';
+import 'package:http/http.dart' as http;
+import 'package:swap/global.dart';
+
+List productList = [];
 class MyPosts_Business extends StatefulWidget {
+  final List pl;
+ const MyPosts_Business ({ Key key, this.pl }): super(key: key);
+  
   @override
-  _MyPosts_BusinessState createState() => _MyPosts_BusinessState();
+  MyPosts_BusinessState createState() => MyPosts_BusinessState();
 }
 
-class _MyPosts_BusinessState extends State<MyPosts_Business> {
+class MyPosts_BusinessState extends State<MyPosts_Business> {
+  var data;
+  List<String> dummy;
+  bool productFlag = false;
+  Future<String> getData() async {
+    http.Response  response = await http.get('$path/product',);   
+    Map<String, dynamic> prodlst = jsonDecode(response.body);
+    productList = prodlst['data']['products'] as List;
+    print(productList.length);
+    productList[0]['price'];
+    //Navigator.pop(context);
+    setState(() {
+        productFlag = true;
+    });
+    // for(var i in productList)
+    //   print(i);
+    // if(productList!=null)
+    // {
+    
+    //   setState(() {      
+    //   });
+    // }
+    //return "success";
+  }
   
-  AnimationController _animationController;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    
+    this.getData();
   }
-  @override  
+
+  @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
-      floatingActionButton: SizedBox(
-        height: size.height*0.2,
-        width:size.width*0.2,
-          child: FittedBox(
-            child: FloatingActionButton(
-              child: Icon(Icons.add, size: size.height*0.05,),
-              onPressed: (){
-                Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=>AddPost()));
-                setState(() {
-                  
-                });
-                //_animationController.forward();
-                print("Viola");},
-          ),
-        ),
-      ),
+      backgroundColor: Color(0xffE9E9E9),
       appBar: AppBar(
         iconTheme: IconThemeData(
-          color: Colors.black, //change your color here
+          color: Colors.black
         ),
+        automaticallyImplyLeading:  true,
         backgroundColor: Colors.white,
-        title: Text(
-          "My Posts",
-          style: TextStyle(color: Colors.black),
-        ),
+        title:Text("My Post", style: TextStyle(color: Colors.black)),
       ),
-      body: ListView.builder(
-            physics: BouncingScrollPhysics(), 
-            itemCount: 7,//data == null ? 0 : data.length,
-            itemBuilder: (BuildContext context, int index) {
-              return Dismissible(
-                direction: DismissDirection.startToEnd,
-                background:Container(
-                  color: Colors.red,
-                  child: Align(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        SizedBox(
-                          width: 20,
-                        ),
-                        Icon(
-                          Icons.delete,
-                          color: Colors.white,
-                        ),
-                        Text(
-                          "Delete",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
+      body: productFlag?
+        RefreshIndicator(
+          onRefresh: () {
+              getData();
+              return Future.delayed(
+                Duration(seconds: 1),
+                () {
+                },
+              );
+            },
+          child: Column(
+            children: <Widget>[
+              //CategoriesList(dummy),
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.fromLTRB(size.width*0.00, 0, 0, size.height*0.02),
+                  child:GridView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisSpacing: size.width*0.02,
+                      mainAxisSpacing: 0.0,
+                      crossAxisCount: 2,
+                      childAspectRatio: 1
+                      ),
+                    //physics: BouncingScrollPhysics(), 
+                    itemCount: 
+                    //widget.pl==null?
+                    productList.length,
+                    //:widget.pl.length,//data == null ? 0 : data.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Dismissible(
+                        direction: DismissDirection.startToEnd,
+                        background:Container(
+                          color: Colors.red,
+                          child: Align(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: <Widget>[
+                                SizedBox(
+                                  width: 20,
+                                ),
+                                Icon(
+                                  Icons.delete,
+                                  color: Colors.white,
+                                ),
+                                Text(
+                                  "Delete",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                  textAlign: TextAlign.left,
+                                ),
+                              ],
+                            ),
+                            alignment: Alignment.centerLeft,
                           ),
-                          textAlign: TextAlign.left,
                         ),
-                      ],
-                    ),
-                    alignment: Alignment.centerLeft,
+                        confirmDismiss: (direction) async {                    
+                            final bool res = await showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    content: Text(
+                                        "Are you sure you want to delete ?"),
+                                    actions: <Widget>[
+                                      FlatButton(
+                                        child: Text(
+                                          "Cancel",
+                                          style: TextStyle(color: Colors.black),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                      FlatButton(
+                                        child: Text(
+                                          "Delete",
+                                          style: TextStyle(color: Colors.red),
+                                        ),
+                                        onPressed: () {
+                                          setState(() {
+                                           
+                                          });
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                });
+                            return res;
+                        },
+                        onDismissed: (direction){print("Deleted");},
+                        key: Key(index.toString()),
+                        child:
+                        InkWell(
+                          onTap: ()=> Navigator.push(context, 
+                            MaterialPageRoute(builder: (context)=>OwnerItemDetail(details: productList[index]))),
+                          child: Padding(
+                            padding: EdgeInsets.fromLTRB(0, size.height*0.01, 0, 0),
+                            child: Container(
+                              //margin: EdgeInsets.fromLTRB(0, 20, 0, 20),
+                              height: size.height*0.4,
+                              width: size.width*0.5,
+                              decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey[300].withOpacity(0.5),
+                                  spreadRadius: 5,
+                                  blurRadius: 20,
+                                  offset: Offset(0, 3), // changes position of shadow
+                                ),
+                              ],
+                              color: Colors.white.withOpacity(0.7),
+                              borderRadius: BorderRadius.circular(20)
+                                ),
+                                child: Column(
+                              children: <Widget>[
+                                Padding(
+                                padding: EdgeInsets.all(MediaQuery.of(context).size.width*0.0),
+                                  child: Container(
+                                    child: ClipRect(
+                                        
+                                        child: Image.asset('assets/burger.png',
+                                        height: size.height*0.15,
+                                        fit: BoxFit.contain,
+                                        )
+                                      // radius: size.height*0.06,
+                                      // backgroundImage: AssetImage('assets/burger.png'),
+                                  ),
+                                  ),
+                                  ),
+                                  Container(
+                                    height: size.height*0.06,
+                                    //color: Colors.blue,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text("Burger ",
+                                      maxLines:2,
+                                      style: TextStyle(fontSize:14,fontWeight: FontWeight.w500),),
+                                    ),
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    children: <Widget>[
+                                      Padding(
+                                        padding: EdgeInsets.fromLTRB(size.width*0.1, 0, size.width*0.1, 0),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                          children: <Widget>[
+                                        //     Text.rich(TextSpan(
+                                        //   text: '\u20b9 200',
+                                        //   style: TextStyle(
+                                        //     color: Colors.grey,
+                                        //     decoration: TextDecoration.lineThrough,
+                                        //   )
+                                        // ),
+                                        // ),
+                                        
+                                        Text(productList[0]['price'].toString(), style: TextStyle(
+                                          color: Colors.purple,
+                                          fontWeight: FontWeight.w600, 
+                                          fontSize: size.height*0.02))
+                                                    ]
+                                                  ),
+                                                ),
+                                              ],
+                                        ),
+                                  Column(
+                                children: <Widget>[
+                                ],
+                                  ),
+                              ],
+                                ),
+                              ),
+                          ),
+                        )
+                        
+                      );
+                    },
                   ),
                 ),
-                confirmDismiss: (direction) async {                    
-                    final bool res = await showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            content: Text(
-                                "Are you sure you want to delete ?"),
-                            actions: <Widget>[
-                              FlatButton(
-                                child: Text(
-                                  "Cancel",
-                                  style: TextStyle(color: Colors.black),
-                                ),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                              FlatButton(
-                                child: Text(
-                                  "Delete",
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                   
-                                  });
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                            ],
-                          );
-                        });
-                    return res;
-                },
-                onDismissed: (direction){print("Deleted");},
-                key: Key(index.toString()),
-                child:Padding(
-                padding: EdgeInsets.fromLTRB(size.width*0.04, size.height*0.02, size.width*0.04, 0),
-                child: Container(
-                height: size.height*0.3,
-                width: 400,
-                decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey[300].withOpacity(0.5),
-                    spreadRadius: 5,
-                    blurRadius: 20,
-                    offset: Offset(0, 3), // changes position of shadow
-                  ),
-                ],
-                color: Colors.white.withOpacity(0.7),
-                borderRadius: BorderRadius.circular(30)
-                  ),
-                child: Column(
-                children: <Widget>[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children:<Widget>[
-                      Row(
-                        children: <Widget>[
-                          Padding(
-                          padding: EdgeInsets.all(MediaQuery.of(context).size.width*0.04),
-                            child: CircleAvatar(
-                              radius: size.height*0.05,
-                              backgroundImage: AssetImage('assets/burger.png'),
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.fromLTRB(0, 0, size.width*0.04, 0),
-                            child: Text("Burger",style: TextStyle(fontSize:22,fontWeight: FontWeight.bold),),
-                          ),
-                        ],
-                      ),
-                      InkWell(
-                        onTap:(){Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=>EditPost()));},
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(0, 0, size.width*0.1, 0),
-                          child: Icon(Icons.edit),
-                        ),
-                      ),
-                    // Column(
-                    //   children: <Widget>[
-                    //    Icon(Icons.shopping_cart),
-                    //    SizedBox(
-                    //      height: size.height*0.01
-                    //    ),
-                    //    Text("Add to cart", style: TextStyle(fontSize: 10)),
-                    //   ],
-                    // ),                            
-                    ],                        
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: new SingleChildScrollView(
-                      scrollDirection: Axis.vertical,
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(size.width*0.04, 0, size.width*0.04, 0),
-                        child: new Text(
-                          "1 Description that is too long in text format(Here Data is coming from API) jdlksaf j klkjjflkdsjfkddfdfsdfds " + 
-                          "2 Description that is too long in text format(Here Data is coming from API) d fsdfdsfsdfd dfdsfdsf sdfdsfsd d " + 
-                          "3 Description that is too long in text format(Here Data is coming from API)  adfsfdsfdfsdfdsf   dsf dfd fds fs" + 
-                          "4 Description that is too long in text format(Here Data is coming from API) dsaf dsafdfdfsd dfdsfsda fdas dsad" + 
-                          "5 Description that is too long in text format(Here Data is coming from API) dsfdsfd fdsfds fds fdsf dsfds fds " ,     
-                          style: new TextStyle(
-                            fontSize:13,color: Colors.black45,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),                 
-                ],
               ),
+            ],
+          ),
+        ):
+        AlertDialog(
+            title:Row( 
+              children:<Widget>[
+                CircularProgressIndicator(
+                  backgroundColor: Colors.indigo, 
+                  strokeWidth: 6.0,
+                ),
+                SizedBox(width: size.width*0.1),
+                Text("Loading")
+              ]
             )
-          )
-        );
-      },
-    )
-  );
-  }
-
-  Widget Posts_Card() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
-      child: GestureDetector(
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15.0),
           ),
-          child: Container(
-            child: Column(
-              children: [
-                Text("Info 1"),
-                Text("Info 1"),
-                Text("Info 1"),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

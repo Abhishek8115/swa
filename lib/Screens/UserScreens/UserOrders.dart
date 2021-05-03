@@ -3,15 +3,15 @@ import 'package:swap/global.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-class Business_Orders extends StatefulWidget {
+class User_Orders extends StatefulWidget {
   @override
   List orders;
-  Business_Orders({Key key, this.orders}): super(key: key);
+  User_Orders({Key key, this.orders}): super(key: key);
 
-  _Business_OrdersState createState() => _Business_OrdersState();
+  _User_OrdersState createState() => _User_OrdersState();
 }
 Size size ;
-class _Business_OrdersState extends State<Business_Orders> {
+class _User_OrdersState extends State<User_Orders> {
   @override
   void initState() {
     // TODO: implement initState    

@@ -39,7 +39,7 @@ class _PhoneVerificationState extends State<PhoneVerification> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomPadding: true,
+      //resizeToAvoidBottomPadding: true,
       backgroundColor: Color(0xffF5F5F2),
       appBar: AppBar(
         iconTheme: IconThemeData(

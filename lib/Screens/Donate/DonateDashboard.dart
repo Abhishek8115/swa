@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:swap/Screens/ChatScreen.dart';
 import 'package:swap/Screens/Donate/DonatedItems.dart';
-import 'package:swap/Screens/UserScreens/AddItemsDonate.dart';
+import 'package:swap/Screens/UserScreens/UserAddItems.dart';
 import 'package:swap/Screens/UserScreens/AddItemsFlashSale.dart';
 import 'package:swap/Screens/UserScreens/AddItemsFriendly.dart';
 import 'package:swap/Screens/UserScreens/MyPost.dart';

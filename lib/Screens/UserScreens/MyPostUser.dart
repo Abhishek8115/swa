@@ -1,74 +1,44 @@
 import 'dart:convert';
-import 'package:swap/Screens/UserScreens/userItemDetails.dart';
+import 'package:swap/Screens/UserScreens/UserMyPostDetails.dart';
 import 'package:swap/Widgets/CategoriesList.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
-//import 'package:swap/Screens/BusinessScreens/BusinessDashboard.dart';
-//import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:swap/global.dart';
 
-List productList = [];
-List catList ;
-class UserFlashSale extends StatefulWidget {
+//List productList = [];
+class MyPosts_User extends StatefulWidget {
 List pl, catList;
-UserFlashSale ({ Key key, this.pl , this.catList}): super(key: key);
+MyPosts_User ({ Key key, this.pl , this.catList}): super(key: key);
   
   @override
-  UserFlashSaleState createState() => UserFlashSaleState();
+  MyPosts_UserState createState() => MyPosts_UserState();
 }
 
-class UserFlashSaleState extends State<UserFlashSale> {
+class MyPosts_UserState extends State<MyPosts_User> {
   var data;
-  List<String> dummy;
   bool productFlag = false;
-  //List pl;
-  // UserFlashSaleState(){
-  //   getData();
-  //   print("calling getData()");
-  // }
-  // RefreshController _refreshController =
-  //     RefreshController(initialRefresh: false);
-  //ap<String, dynamic> productDetails = pl['data']['products'];
-  // UserFlashSaleState(){
-  //   print(widget.pl);
-  // }
- 
   Future<String> getData() async {
     http.Response  response = await http.get('$path/product',);   
     Map<String, dynamic> prodlst = jsonDecode(response.body);
     widget.pl = prodlst['data']['products'] as List;
-    // print(productList.length);
-    // productList[0]['price'];
     http.Response  result = await http.get('$path/category',);   
     Map<dynamic, dynamic> catlst = jsonDecode(result.body);
     print('getData called');
-    print(catlst['data']['categories']);
-    widget.catList = catlst['data']['categories'];
-    // print(catList);
-    //Navigator.pop(context);
+    print(widget.catList);
     setState(() {
-        productFlag = true;
+      print("setState called");      
+      productFlag = true;
+      //Navigator.pop(context);
     });
-    // for(var i in productList)
-    //   print(i);
-    // if(productList!=null)
-    // {
     
-    //   setState(() {      
-    //   });
-    // }
-    //return "success";
   }
   
 
   @override
   void initState() {
     super.initState();
-    //Navigator.pop(context);
-    //print(pl['data']['products']);
-    //print(productList.length);
+    //print(widget.pl);
     //this.getData();
   }
 
@@ -76,34 +46,29 @@ class UserFlashSaleState extends State<UserFlashSale> {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
-      //floatingActionButton: FloatingActionButton(onPressed: (){print("Viola");},),
       backgroundColor: Color(0xffE9E9E9),
-      // body: SlidingUpPanel(
-      //   backdropEnabled: false,
-      //   minHeight: size.height*0.2,
-      //   maxHeight: 300,
-      //   panelBuilder: (scrollController) =>
-      //       buildSlidingPanel(scrollController: scrollController),
-        body: 
+      appBar: AppBar(
+        iconTheme: IconThemeData(
+          color: Colors.black
+        ),
+        automaticallyImplyLeading:  true,
+        backgroundColor: Colors.white,
+        title:Text("My Post", style: TextStyle(color: Colors.black)),
+      ),
+      body:
+      //productFlag?
         RefreshIndicator(
           onRefresh: () {
               getData();
               return Future.delayed(
                 Duration(seconds: 1),
                 () {
-                    //print("refreshed");
-                  // showSnackBar(
-                  //   SnackBar(
-                  //     content: const Text('Page Refreshed'),
-                  //   ),
-                  // );
                 },
               );
             },
           child: Column(
-            // physics: const AlwaysScrollableScrollPhysics(),
             children: <Widget>[
-              CategoriesList(categories: widget.catList),
+              //CategoriesList(dummy),
               Expanded(
                 child: Container(
                   padding: EdgeInsets.fromLTRB(size.width*0.00, 0, 0, size.height*0.02),
@@ -123,8 +88,12 @@ class UserFlashSaleState extends State<UserFlashSale> {
                     //:widget.pl.length,//data == null ? 0 : data.length,
                     itemBuilder: (BuildContext context, int index) {
                       return InkWell(
-                        onTap: ()=> Navigator.push(context, 
-                          MaterialPageRoute(builder: (context)=>UserItemDetail(details: widget.pl[index]))),
+                        onTap: (){ 
+                          print("catList :${widget.catList}");
+                          Navigator.push(context, 
+                          MaterialPageRoute(builder: (context)=>UserPostItemDetail(details: widget.pl[index], 
+                          categoryList: widget.catList)));
+                        },
                         child: Padding(
                           padding: EdgeInsets.fromLTRB(0, size.height*0.01, 0, 0),
                           child: Container(
@@ -195,41 +164,8 @@ class UserFlashSaleState extends State<UserFlashSale> {
                                               ),
                                             ],
                                       ),
-                                // SizedBox(
-                                //   height: size.height*0.01
-                                // ),
-                                // Text("Add to Cart", style: TextStyle( fontSize: 15, fontWeight: FontWeight.w500, color: Colors.purple )),
-                                // Padding(
-                                //   padding: const EdgeInsets.all(8.0),
-                                //   child: Text.rich(
-                                //     TextSpan(
-                                //       //text: 'This is item cost',
-                                //       children:<TextSpan>[
-                                //         TextSpan(
-                                //           text: '\u20b9 200',
-                                //           style: TextStyle(
-                                //             color: Colors.grey,
-                                //             decoration: TextDecoration.lineThrough,
-                                //           )
-                                //         ),
-                                //         TextSpan(text: '\u20b9 100')
-                                //       ]
-                                //     )
-                                //   ),
-                                // ),
                                 Column(
                               children: <Widget>[
-                                
-                                // SizedBox(
-                                //   height: size.height*0.02
-                                // ),
-                                // Container(                          
-                                //   height: size.height*0.05,
-                                //   width: size.width*0.4, 
-                                //   child: Text("This is my last hurrah",
-                                //   overflow:TextOverflow.clip,
-                                //   softWrap: true,style: TextStyle(fontSize:13,color: Colors.black45),),
-                                // )
                               ],
                                 ),
                             ],
@@ -244,13 +180,19 @@ class UserFlashSaleState extends State<UserFlashSale> {
             ],
           ),
         )
-        ,
-      //),
+        // :
+        // AlertDialog(
+        //     title:Row( 
+        //       children:<Widget>[
+        //         CircularProgressIndicator(
+        //           backgroundColor: Colors.lightBlue[100], 
+        //           strokeWidth: 6.0,
+        //         ),
+        //         SizedBox(width: size.width*0.1),
+        //         Text("Loading")
+        //       ]
+        //     )
+        //   ),
     );
   }
 }
-
-// Widget buildSlidingPanel({
-//   @required ScrollController scrollController,
-// }) =>
-//     scrollfreshsale();

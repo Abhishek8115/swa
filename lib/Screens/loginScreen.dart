@@ -19,17 +19,29 @@ import 'package:convert/convert.dart';
 import 'resetPassword.dart';
 import 'package:swap/Screens/UserScreens/UserDashboard.dart';
 import 'package:swap/Screens/BusinessScreens/BusinessDashboard.dart';
+import 'package:swap/global.dart';
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => new _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin{
+
+// bool loaderFlag = false;
+// bool productFlag = false;
+// Map<String, dynamic> userInfo;
+// Map<String, dynamic> productList;
+
+
+class _LoginPageState extends State<LoginPage> 
+//with TickerProviderStateMixin
+{
   static String token;
   bool _isLoggedIn = true;
   Map userProfile;
+  Map<String , dynamic> loginDetails;
   var _razorpay = Razorpay();
-  AnimationController _animationController;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  //AnimationController _animationController;
   var data;
   TextEditingController username = TextEditingController();
   TextEditingController password = TextEditingController();
@@ -71,8 +83,8 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin{
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(
           {
-            "username": number, 
-            "password": password,
+            "username": "9358114227", 
+            "password": "12345678",
           }
         )
       );
@@ -93,7 +105,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin{
     // TODO: implement dispose
     super.dispose();
     //_razorpay.clear(); // Removes all listeners
-    _animationController.dispose();
+    //_animationController.dispose();
 
   }
   var options;
@@ -114,9 +126,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin{
     //   }
     // };
     
-    _animationController =
-        AnimationController(duration: new Duration(seconds: 2), vsync: this);
-    _animationController.repeat();
+    // _animationController =
+    //     AnimationController(duration: new Duration(seconds: 2), vsync: this);
+    // _animationController.repeat();
   }
   
 // Future payRazor()async
@@ -208,7 +220,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin{
                   borderRadius: BorderRadius.circular(32),
                 ),
                 child: TextField(
-                  keyboardType: TextInputType.numberWithOptions(),
+                  keyboardType: TextInputType.emailAddress,
                     controller: username,
                     cursorColor: Color(0xff90E5BF),
                     decoration: InputDecoration(
@@ -247,33 +259,35 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin{
                 primaryColorDark: Color(0xffFFFFFF),
               ),
               child: TextField(
-                  obscureText: true,
-                  controller: password,
-                  cursorColor: Color(0xff90E5BF),
-                  decoration: InputDecoration(
-                      filled: true,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 15),
-                      hintText: "password",
-                      suffixIcon: Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(context,MaterialPageRoute(builder: (BuildContext context)=>ResetPassword()));
-                          },
-                          child: Text(
-                            "Forgot?",
-                            style: TextStyle(color: Color(0xff90E5BF)),
-                          ),
+                obscureText: true,
+                controller: password,
+                cursorColor: Color(0xff90E5BF),
+                decoration: InputDecoration(
+                    filled: true,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 15),
+                    hintText: "password",
+                    suffixIcon: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(context,MaterialPageRoute(builder: (BuildContext context)=>ResetPassword()));
+                        },
+                        child: Text(
+                          "Forgot?",
+                          style: TextStyle(color: Color(0xff90E5BF)),
                         ),
                       ),
-                      fillColor: Color(0xffFFFFFF),
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide.none,
-                        borderRadius: const BorderRadius.all(
-                          const Radius.circular(100.0),
-                        ),
-                      ))),
-            ),
+                    ),
+                    fillColor: Color(0xffFFFFFF),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,
+                      borderRadius: const BorderRadius.all(
+                        const Radius.circular(100.0),
+                      ),
+                    )
+                  )
+                ),
+              ),
           ),
           SizedBox(height: 40.0),
           InkWell(
@@ -290,16 +304,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin{
               print("hello");
               print("number: ${username.text}");
               print("password: ${password.text}");
-              http.Response result = await getData(username.text.trim(), password.text.trim());              
-              Map<String , dynamic> loginDetails = jsonDecode(result.body);
-              print(loginDetails['data']['token']);
-
-              Directory directory = await getApplicationDocumentsDirectory();
-              File file = File('${directory.path}/token.txt');
-              await file.writeAsString(loginDetails['data']['token']);
-              File file2 = File('${directory.path}/userId.txt');
-              await file2.writeAsString(loginDetails['data']['userId']);
-              token = loginDetails['token'];
               showGeneralDialog(
               barrierColor: Colors.black.withOpacity(0.5),
               transitionBuilder: (context, a1, a2, widget) {
@@ -311,8 +315,8 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin{
                     title:Row(
                       children:<Widget>[
                         CircularProgressIndicator(
-                          backgroundColor: Colors.indigo, 
-                          valueColor: _animationController.drive(ColorTween(begin: Colors.indigo, end: Colors.deepPurple[100])),                  
+                          backgroundColor: Colors.blue[100], 
+                          //valueColor: Colors.blue[100],                  
                           strokeWidth: 6.0,
                         ),
                         SizedBox(width: size.width*0.1),
@@ -329,6 +333,13 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin{
               context: context,
               pageBuilder: (context, animation1, animation2) {}
               );
+              http.Response result = await getData(username.text.trim(), password.text.trim());              
+              loginDetails = jsonDecode(result.body);
+              
+              // print(loginDetails['data']['token']);
+              
+              // token = loginDetails['token'];
+              
               //Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => LandingPage()), (Route<dynamic> route) => false);
 
               // print("hello");
@@ -337,11 +348,111 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin{
               // String result = await getData(username.text, password.text);
               // if (result.contains("success!")) {
               if(loginDetails['type'] == 'success'){
+                Directory directory = await getApplicationDocumentsDirectory();
+                File file = File('${directory.path}/token.txt');
+                await file.writeAsString(loginDetails['data']['token']);
+                File file2 = File('${directory.path}/userId.txt');
+                await file2.writeAsString(loginDetails['data']['userId']);
+                // void loadUserDetails()async
+                // {
+                //   Directory directory = await getApplicationDocumentsDirectory(); 
+                //   File file2 = File('${directory.path}/userId.txt');
+                //   File file3 = File('${directory.path}/token.txt');
+                //   showGeneralDialog(
+                //     barrierColor: Colors.black.withOpacity(0.5),
+                //     transitionBuilder: (context, a1, a2, widget) {
+                //       return Transform.scale(
+                //         scale: a1.value,
+                //         child: Opacity(
+                //           opacity: a1.value,
+                //           child: AlertDialog(
+                //           title:Row( 
+                //             children:<Widget>[
+                //               CircularProgressIndicator(
+                //                 backgroundColor: Colors.indigo, 
+                //                 //valueColor: _animationController.drive(ColorTween(begin: Colors.indigo, end: Colors.deepPurple[100])),                  
+                //                 strokeWidth: 6.0,
+                //               ),
+                //               SizedBox(width: size.width*0.1),
+                //               Text("Loading")
+                //             ]
+                //           )
+                //         ),
+                //         ),
+                //       );
+                //     },
+                //     transitionDuration: Duration(milliseconds: 300),
+                //     barrierDismissible: false,
+                //     barrierLabel: '',                   
+                //     context: _scaffoldKey.currentContext,
+                //     pageBuilder: (context, animation1, animation2) {}
+                //   );
+                //   String userId = await file2.readAsString();
+                //   String token = await file3.readAsString();
+                //   print(token);
+                //   print(userId);
+                //   http.Response response = await http.get(
+                //     "${path}/profile/${userId}",
+                //     headers: {
+                //       "Content-Type":"application/json",
+                //       "Accept":"application/json",
+                //       "Authorization":"Bearer $token"
+                //     }  
+                //   );
+                //   userInfo = jsonDecode(response.body);
+                //   print(userInfo);
+                //   Navigator.pop(context);
+                //   loaderFlag = true;
+                //   setState(() {});
+                // }
+                // void loadProductDetails()async
+                // {
+                //   showGeneralDialog(
+                //     barrierColor: Colors.black.withOpacity(0.5),
+                //     transitionBuilder: (context, a1, a2, widget) {
+                //       return Transform.scale(
+                //         scale: a1.value,
+                //         child: Opacity(
+                //           opacity: a1.value,
+                //           child: AlertDialog(
+                //           title:Row( 
+                //             children:<Widget>[
+                //               CircularProgressIndicator(
+                //                 backgroundColor: Colors.indigo, 
+                //                 //valueColor: _animationController.drive(ColorTween(begin: Colors.indigo, end: Colors.deepPurple[100])),                  
+                //                 strokeWidth: 6.0,
+                //               ),
+                //               SizedBox(width: size.width*0.1),
+                //               Text("Loading")
+                //             ]
+                //           )
+                //         ),
+                //         ),
+                //       );
+                //     },
+                //     transitionDuration: Duration(milliseconds: 300),
+                //     barrierDismissible: false,
+                //     barrierLabel: '',
+                //     context: context,
+                //     pageBuilder: (context, animation1, animation2) {}
+                //   );
+                // http.Response  response = await http.get('$path/product',);
+                // productFlag = true;
+                // Navigator.pop(context);
+                // Navigator.pop(context);
+                // Navigator.pop(context);
+                // productList = jsonDecode(response.body);
+                // print(productList);
+                // }
+                // loadProductDetails();
+                // loadUserDetails();
+                Navigator.pop(context);
                 Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (context) => BusinessDashboard()), (Route<dynamic> route) => false);
+                MaterialPageRoute(builder: (context) => UserDashboard()), (Route<dynamic> route) => false);
                 loginDetails = null;
               }
               else{
+                Navigator.pop(context);
                 loginDetails = null;
                 return(
                   Toast.show("Please Enter Valid Details", context,

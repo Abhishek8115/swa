@@ -50,7 +50,7 @@ class _FreshSaleState extends State<FreshSale> {
       //       buildSlidingPanel(scrollController: scrollController),
         body: Column(
           children: <Widget>[
-            CategoriesList(dummy),
+            //CategoriesList(dummy),
             Expanded(
                           child: Container(
                 //color: Colors.black,

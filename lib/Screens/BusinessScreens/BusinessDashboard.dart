@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:swap/Screens/BusinessScreens/BusinessOrders.dart';
 import 'package:swap/Screens/BusinessScreens/BusinessSupport.dart';
@@ -20,14 +19,16 @@ import 'dart:io';
 import 'package:swap/global.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
+import 'package:swap/Screens/loginScreen.dart';
 
 class BusinessDashboard extends StatefulWidget {
   @override
   _BusinessDashboardState createState() => _BusinessDashboardState();
 }
-
+List productList = [];
 class _BusinessDashboardState extends State<BusinessDashboard> {
   bool loaderFlag = false;
+  bool productFlag = false;
   Map<String, dynamic> userInfo;
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   Size size ; 
@@ -36,10 +37,12 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
   void initState() {
     // TODO: implement initState
     loadUserDetails();
+    loadProductDetails();
     super.initState();
 
   }
-  void loadUserDetails()async{
+  void loadUserDetails()async
+  {
     Directory directory = await getApplicationDocumentsDirectory(); 
     File file2 = File('${directory.path}/userId.txt');
     File file3 = File('${directory.path}/token.txt');
@@ -85,14 +88,69 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
       }  
     );
     userInfo = jsonDecode(response.body);
-    print(userInfo);
-    Navigator.pop(context);
+    //print(userInfo);
+    //Navigator.pop(context);
     loaderFlag = true;
     setState(() {});
   }
-  void loadProductDetails()
+  void loadProductDetails()async
   {
-    
+    // showGeneralDialog(
+    //   barrierColor: Colors.black.withOpacity(0.5),
+    //   transitionBuilder: (context, a1, a2, widget) {
+    //     return Transform.scale(
+    //       scale: a1.value,
+    //       child: Opacity(
+    //         opacity: a1.value,
+    //         child: AlertDialog(
+    //         title:Row( 
+    //           children:<Widget>[
+    //             CircularProgressIndicator(
+    //               backgroundColor: Colors.blue[100], 
+    //               //valueColor: _animationController.drive(ColorTween(begin: Colors.indigo, end: Colors.deepPurple[100])),                  
+    //               strokeWidth: 6.0,
+    //             ),
+    //             SizedBox(width: size.width*0.1),
+    //             Text("Loading")
+    //           ]
+    //         )
+    //       ),
+    //       ),
+    //     );
+    //   },
+    //   transitionDuration: Duration(milliseconds: 300),
+    //   barrierDismissible: false,
+    //   barrierLabel: '',
+    //   context: context,
+    //   pageBuilder: (context, animation1, animation2) {}
+    // );
+   http.Response  response = await http.get('$path/product',);
+   
+   
+  //  Navigator.pop(context);
+  //  Navigator.pop(context);
+  //  Navigator.pop(context);
+  
+   Map<String, dynamic> prodlst = jsonDecode(response.body);
+   //print(prodlst['data']['products']);
+   //List<String> t= jsonEncode(prodlst['data']['products']) as List;
+   //String t2 = jsonEncode(t);
+  //  productList = jsonDecode(t2);
+  //  print("String t2 : $t2");
+    List productList = prodlst['data']['products'] as List;
+    print(productList.length);
+    // for(var i in productList)
+    //   print(i);
+    if(productList!=null)
+    {
+      productFlag = true;
+      Navigator.pop(context);
+      setState(() {      
+      });
+    }
+    //print("map productList : $productList");
+   //print("printing productList : $t");
+   //print("printing productList : $productList");
   }
   @override
   Widget build(BuildContext context) {
@@ -340,11 +398,46 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
           ),
 
           InkWell(
-            onTap: () {
+            onTap: () async{
+               http.Response response = await http.get(
+                "${path}/order" 
+              );
+              showGeneralDialog(
+                barrierColor: Colors.black.withOpacity(0.5),
+                transitionBuilder: (context, a1, a2, widget) {
+                  return Transform.scale(
+                    scale: a1.value,
+                    child: Opacity(
+                      opacity: a1.value,
+                      child: AlertDialog(
+                      title:Row( 
+                        children:<Widget>[
+                          CircularProgressIndicator(
+                            backgroundColor: Colors.indigo, 
+                            //valueColor: _animationController.drive(ColorTween(begin: Colors.indigo, end: Colors.deepPurple[100])),                  
+                            strokeWidth: 6.0,
+                          ),
+                          SizedBox(width: size.width*0.1),
+                          Text("Loading")
+                        ]
+                      )
+                    ),
+                    ),
+                  );
+                },
+                transitionDuration: Duration(milliseconds: 300),
+                barrierDismissible: false,
+                barrierLabel: '',
+                context: context,
+                pageBuilder: (context, animation1, animation2) {}
+              );
+              Map<String, dynamic> prodlst = jsonDecode(response.body);
+              List orderList = prodlst['data']['orders'] as List;
+              Navigator.pop(context);
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => Business_Orders()));
+                      builder: (context) => Business_Orders(orders: orderList)));
               // Navigator.push(context, MaterialPageRoute(builder: (context) => Parking_Lot_Screen()));
             },
             child: Padding(
@@ -472,6 +565,9 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
               width: 30.0,
               child: new GestureDetector(
                 onTap: () {
+                  setState(() {
+                    print("calling setState");
+                  });
                 },
                 child: Stack(
                   children: <Widget>[
@@ -511,7 +607,12 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
           )
         ],
       ),
-      body: BusinessFlashSale()
+      body: 
+      productFlag?BusinessFlashSale(pl: productList):
+      Center(
+        child:Text("Nothing added", style: TextStyle(color: Colors.black54, fontSize:size.height*0.05)
+        )
+      )          
       // Column(
       //   children: [
       //     SizedBox(
