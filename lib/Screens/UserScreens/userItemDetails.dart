@@ -12,7 +12,19 @@ class UserItemDetail extends StatefulWidget {
   _UserItemDetailState createState() => _UserItemDetailState();
 }
 Size size;
+bool showButton = false, changeColor = false;
 class _UserItemDetailState extends State<UserItemDetail> {
+  
+  int quantity;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    showButton = false;
+    changeColor = false;
+    quantity = 0;
+  }
   @override
   Widget build(BuildContext context) {
     //print(widget.details['price']);
@@ -77,27 +89,68 @@ class _UserItemDetailState extends State<UserItemDetail> {
                         ),
                         Align(
                           alignment: Alignment.bottomCenter,
-                          child: FlatButton(
-                            splashColor: Colors.purple[200],
-                              height: size.height*0.06,
-                              color: Colors.purple,
-                              onPressed: ()async{
-                                // final response = await http.post('$path/addToCart',
-                                //   headers: {
-                                //     //HttpHeaders.contentTypeHeader: "application/json",
-                                //     "Authorization":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb250YWN0TnVtYmVyIjoiNDIxNDIyNyIsInVzZXJJZCI6IjYwNjljYTYzZDgzNDkwMDAxN2EyN2I0ZCIsImRhdGUiOiIyMDIxLTA0LTA0VDE0OjQyOjA5LjIzNloiLCJpYXQiOjE2MTc1NDczMjl9.oi3qaowd3Ct0NP3fPzsemJaMTHqkstlasalnIN5oAIU"
-                                //   },
-                                //   body: jsonEncode({
-                                //     'productId':'5fe875b6b72ad83b88ecce31'
-                                //   })
-                                // );
-                                // //Map<String , dynamic> details = jsonDecode(response.body);
-                                // Map<String, dynamic> details= jsonDecode(response.body);
-                                // print(details);
-                                // print('response : ${response.body}');
-                              },
-                              child: Text("Add to cart",  style: TextStyle(color: Colors.white))
-                            ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: <Widget>[
+                              showButton?FlatButton(
+                                splashColor: Colors.purple[200],
+                                  height: size.height*0.06,
+                                  color: Colors.transparent,
+                                  onPressed: ()async{
+                                    showButton = true;
+                                    if(quantity == 0)
+                                      showButton = false;
+                                    else
+                                      quantity--;
+                                    print(quantity.toString());
+                                    setState(() {});
+                                  },
+                                  child: Text("-", style: TextStyle(
+                                    fontSize: size.height*0.04,
+                                    color: changeColor? Colors.black54: Colors.black,
+                                    fontWeight: FontWeight.w400),)
+                                ):Text(" "),
+                              FlatButton(
+                                splashColor: Colors.purple[200],
+                                  height: size.height*0.06,
+                                  color: Colors.purple,
+                                  onPressed: ()async{
+                                    showButton = true;
+                                    print("Added to Cart");
+                                    setState(() {});
+                                  },
+                                  child: Row(
+                                    children: <Widget>[
+                                      Text("Add to cart",  style: TextStyle(color: Colors.white)),
+                                      showButton?
+                                      Text("  "+quantity.toString(),  style: TextStyle(color: Colors.white)):
+                                      Text(" "),
+                                    ],
+                                  )
+                                ),
+                                
+                                showButton?
+                              FlatButton(
+                                splashColor: Colors.purple[200],
+                                  //height: size.height*0.06,
+                                  color: Colors.transparent,
+                                  onPressed: ()async{
+                                    showButton = true;
+                                    if(quantity>widget.details['quantity'])
+                                      changeColor = true;
+                                    else
+                                      quantity++;
+                                     print(quantity.toString());
+                                    setState(() {});
+                                  },
+                                  child: Text("+", style: TextStyle(
+                                    fontSize: size.height*0.04,
+                                    color: changeColor? Colors.black54: Colors.black,
+                                    fontWeight: FontWeight.w300),)
+                                )
+                                :Text(" "),
+                            ],
+                          ),
                         )
                         
           ]
