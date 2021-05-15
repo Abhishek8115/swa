@@ -44,7 +44,7 @@ dependencies:
   flutter_launcher_icons:
   toast:
   location: ^3.0.2
-  razorpay_flutter: 1.1.1
+  razorpay_flutter: ^1.1.4
   google_maps_flutter: 1.1.1
   flutter_polyline_points: ^0.1.0
   fluttertoast: ^7.1.6

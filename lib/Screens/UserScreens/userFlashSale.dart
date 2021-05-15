@@ -46,7 +46,7 @@ class UserFlashSaleState extends State<UserFlashSale> {
     print('getData called');
     print(catlst['data']['categories']);
     widget.catList = catlst['data']['categories'];
-    // print(catList);
+    print("\n \n \n \n ${widget.catList}");
     //Navigator.pop(context);
     setState(() {
         productFlag = true;

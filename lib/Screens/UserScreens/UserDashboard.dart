@@ -10,6 +10,7 @@ import 'package:swap/Screens/BusinessScreens/ShopRoutine.dart';
 import 'package:swap/Screens/UserScreens/userFlashSale.dart';
 import 'package:swap/Widgets/CategoriesList.dart';
 import 'package:swap/Screens/Cart.dart';
+import 'package:swap/Screens/CartPage.dart';
 import 'package:swap/Screens/donate.dart';
 import 'package:swap/Screens/fresh_sale.dart';
 import 'package:swap/SplashScreen.dart';
@@ -280,12 +281,55 @@ class _UserDashboardState extends State<UserDashboard> {
           ),
 
           InkWell(
-            onTap: () {
-              // print(productList);
+            onTap: () async{
+              
+              Directory directory = await getApplicationDocumentsDirectory(); 
+              File file3 = File('${directory.path}/token.txt');
+              showGeneralDialog(
+                barrierColor: Colors.black.withOpacity(0.5),
+                transitionBuilder: (context, a1, a2, widget) {
+                  return Transform.scale(
+                    scale: a1.value,
+                    child: Opacity(
+                      opacity: a1.value,
+                      child: AlertDialog(
+                      title:Row( 
+                        children:<Widget>[
+                          CircularProgressIndicator(
+                            backgroundColor: Colors.indigo, 
+                            //valueColor: _animationController.drive(ColorTween(begin: Colors.indigo, end: Colors.deepPurple[100])),                  
+                            strokeWidth: 6.0,
+                          ),
+                          SizedBox(width: size.width*0.1),
+                          Text("Loading")
+                        ]
+                      )
+                    ),
+                    ),
+                  );
+                },
+                transitionDuration: Duration(milliseconds: 300),
+                barrierDismissible: false,
+                barrierLabel: '',
+                context: context,
+                pageBuilder: (context, animation1, animation2) {}
+              );
+              String token = await file3.readAsString();
+              print(token);
+              http.Response  response = await http.get('$path/product/my_products',
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": "Bearer $token"
+                }
+              );
+              Navigator.pop(context);
+              Map<String, dynamic> prodlst = jsonDecode(response.body);
+              print(prodlst['data']['products']);
+
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => MyPosts_User(pl: productList, catList: catList)));
+                      builder: (context) => MyPosts_User(pl: prodlst['data']['products'], catList: catList)));
             },
             child: Padding(
               padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
@@ -346,7 +390,7 @@ class _UserDashboardState extends State<UserDashboard> {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => CartScreen()));
+                      builder: (context) => CartPage()));
             },
             child: Padding(
               padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),

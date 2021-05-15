@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:swap/global.dart';
 import 'package:convert/convert.dart';
-
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 class UserItemDetail extends StatefulWidget {
   Map<String, dynamic> details;
@@ -13,6 +14,10 @@ class UserItemDetail extends StatefulWidget {
 }
 Size size;
 bool showButton = false, changeColor = false;
+List<Map<String, String>> productList = <Map<String, String>>[];
+
+
+
 class _UserItemDetailState extends State<UserItemDetail> {
   
   int quantity;
@@ -23,7 +28,7 @@ class _UserItemDetailState extends State<UserItemDetail> {
     super.initState();
     showButton = false;
     changeColor = false;
-    quantity = 0;
+    quantity = 1;
   }
   @override
   Widget build(BuildContext context) {
@@ -98,7 +103,7 @@ class _UserItemDetailState extends State<UserItemDetail> {
                                   color: Colors.transparent,
                                   onPressed: ()async{
                                     showButton = true;
-                                    if(quantity == 0)
+                                    if(quantity <= 1)
                                       showButton = false;
                                     else
                                       quantity--;
@@ -115,15 +120,123 @@ class _UserItemDetailState extends State<UserItemDetail> {
                                   height: size.height*0.06,
                                   color: Colors.purple,
                                   onPressed: ()async{
+                                    
+                                    print("Added to Cart");    
+                                    if (showButton) {
+                                      print("sending to server .....");
+                                      Directory directory = await getApplicationDocumentsDirectory();
+                                      File file3 = File('${directory.path}/token.txt');
+                                      String token = await file3.readAsString();
+                                      double price = double.parse(widget.details['price'].toString())*quantity;
+                                      showGeneralDialog(
+                                        barrierColor: Colors.black.withOpacity(0.5),
+                                        transitionBuilder: (context, a1, a2, widget) {
+                                          return Transform.scale(
+                                            scale: a1.value,
+                                            child: Opacity(
+                                              opacity: a1.value,
+                                              child: AlertDialog(
+                                              title:Row( 
+                                                children:<Widget>[
+                                                  CircularProgressIndicator(
+                                                    backgroundColor: Colors.indigo, 
+                                                    //valueColor: _animationController.drive(ColorTween(begin: Colors.indigo, end: Colors.deepPurple[100])),                  
+                                                    strokeWidth: 6.0,
+                                                  ),
+                                                  SizedBox(width: MediaQuery.of(context).size.width*0.1),
+                                                  Text("Loading")
+                                                ]
+                                              )
+                                            ),
+                                            ),
+                                          );
+                                        },
+                                        transitionDuration: Duration(milliseconds: 300),
+                                        barrierDismissible: false,
+                                        barrierLabel: '',
+                                        context: context,
+                                        pageBuilder: (context, animation1, animation2) {}
+                                      );
+                                      print(jsonEncode({
+                                          "cart":{
+                                            "totalPrice": price,
+                                            "totalQuantity": 1,
+                                            "products": [
+                                              {
+                                                "product": widget.details['_id'],
+                                                "quantity": quantity
+                                              }
+                                            ]
+                                          }
+                                        }));
+                                      var res = await http.patch("$path/profile/cart",
+                                        headers:{
+                                          "Content-Type": "application/json",
+                                          "Authorization": "Bearer $token"
+                                        },
+                                        body: jsonEncode({
+                                          "cart":{
+                                            "totalPrice": price,
+                                            "totalQuantity": 1,
+                                            "products": [
+                                              {
+                                                "product": widget.details['_id'],
+                                                "quantity": quantity
+                                              }
+                                            ]
+                                          }
+                                        })
+                                      );                                      
+                                      Navigator.pop(context);
+                                      print(res.body);
+                                      showGeneralDialog(
+                                        barrierColor: Colors.black.withOpacity(0.5),
+                                        transitionBuilder: (context, a1, a2, widget) {
+                                        return Transform.scale(
+                                        scale: a1.value,
+                                        child: Opacity(
+                                          opacity: a1.value,
+                                          child: AlertDialog(
+                                          title:Column( 
+                                            children:<Widget>[
+                                              // CircularProgressIndicator(
+                                              //   backgroundColor: Colors.indigo, 
+                                              //   //valueColor: _animationController.drive(ColorTween(begin: Colors.indigo, end: Colors.deepPurple[100])),                  
+                                              //   strokeWidth: 6.0,
+                                              // ),
+                                              //SizedBox(width: MediaQuery.of(context).size.width*0.05),
+                                              Image.asset("assets/successful.gif",
+                                                height: MediaQuery.of(context).size.height * 0.1,
+                                                width: MediaQuery.of(context).size.width * 0.3,
+                                              ),
+                                              SizedBox(width: MediaQuery.of(context).size.width*0.05),
+                                              Text("Added to cart")
+                                            ]
+                                          )
+                                        ),
+                                        ),
+                                        );
+                                        },
+                                        transitionDuration: Duration(milliseconds: 300),
+                                        barrierDismissible: false,
+                                        barrierLabel: '',
+                                        context: context,
+                                        pageBuilder: (context, animation1, animation2) {}
+                                        );                                      
+                                        Future.delayed(Duration(milliseconds: 2000)).then((onValue){
+                                          Navigator.pop(context);
+                                          Navigator.pop(context);
+                                        }
+                                      );                                                                         
+                                    }
                                     showButton = true;
-                                    print("Added to Cart");
                                     setState(() {});
                                   },
                                   child: Row(
                                     children: <Widget>[
                                       Text("Add to cart",  style: TextStyle(color: Colors.white)),
                                       showButton?
-                                      Text("  "+quantity.toString(),  style: TextStyle(color: Colors.white)):
+                                      Text("  " + quantity.toString(),  style: TextStyle(color: Colors.white)):
                                       Text(" "),
                                     ],
                                   )
@@ -139,7 +252,7 @@ class _UserItemDetailState extends State<UserItemDetail> {
                                     if(quantity>widget.details['quantity'])
                                       changeColor = true;
                                     else
-                                      quantity++;
+                                      ++quantity;
                                      print(quantity.toString());
                                     setState(() {});
                                   },
