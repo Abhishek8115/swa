@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:swap/Screens/PaymentModePage.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:http/http.dart' as http;
@@ -23,6 +24,9 @@ class CartPage extends StatefulWidget {
 
 List<dynamic> pr = [];
 String token;
+var razorpay;
+String order_id;
+
 class _CartPageState extends State<CartPage> {
   
   
@@ -116,6 +120,26 @@ class _CartPageState extends State<CartPage> {
       })
     );
     print(result.body);
+    Map<String, dynamic> temp = {};
+    temp = jsonDecode(result.body);
+    order_id = temp['data']['razorpayOrder']['id'];
+    print("Checkpoint 1");
+    await payRazor();
+    // var options = {
+    //   'key': '<YOUR_KEY_ID>',
+    //   'amount': totalPrice, //in the smallest currency sub-unit.
+    //   'name': 'Foodswap',
+    //   'order_id': order_id, // Generate order_id using Orders API
+    //   'description': 'Fine T-Shirt',
+    //   'timeout': 60, // in seconds
+    // };
+    // print("Checkpoint 2");
+    // try {
+    //   await razorpay.open(options);
+    // } catch (e) {
+    //   print(e.toString());
+    // }
+    print("Checkpoint 3");
     Navigator.pop(context);
     showGeneralDialog(
       barrierColor: Colors.black.withOpacity(0.5),
@@ -157,19 +181,70 @@ class _CartPageState extends State<CartPage> {
     );  
   }
   
+  Future payRazor()async
+  {
+    double price = totalPrice * 100;
+   //if (Platform.isAndroid) WebView.platform = SurfaceAndroidWebView();
+    var options = {
+      'key': 'rzp_test_KmRPzEzinUlkwn',
+      'amount': (price*100).toString(), //in the smallest currency sub-unit.
+      'name': 'Foodswap',
+      'order_id': order_id, 
+        'prefill': {
+        'contact': '9123456789',
+        'email': 'gaurav.kumar@example.com'
+      },
+      // Generate order_id using Orders API
+      //'description': 'Fine T-Shirt',
+      "external" : {
+        "wallets" : ["paytm"]
+      }
+    };
+    try{
+      razorpay.open(options);
+    }catch(e){
+      debugPrint(e);
+    }
+    razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, handlerPaymentSuccess);
+    razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, handlerErrorFailure);
+    razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, handlerExternalWallet);
+  }
+  //   try{
+  //     razorpay.open(options);
+  //   }catch(e){
+  //     debugPrint(e);
+  // }
+
   @override
   void initState() {
     // TODO: implement initSta
     print("cart is called ");
     super.initState();
-    var razorpay = new Razorpay();
+    razorpay = new Razorpay();
     razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, handlerPaymentSuccess);
     razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, handlerErrorFailure);
     razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, handlerExternalWallet);
     fetchData = false;
+    // var options = {
+    //   'key': '<YOUR_KEY_ID>',
+    //   'amount': 50000, //in the smallest currency sub-unit.
+    //   'name': 'Foodswap',
+    //   'order_id': 'order_EMBFqjDHEEn80l', // Generate order_id using Orders API
+    //   'description': 'Fine T-Shirt',
+    //   'timeout': 60, // in seconds
+    //   // 'prefill': {
+    //   //   'contact': '9123456789',
+    //   //   'email': 'gaurav.kumar@example.com'
+    //   // }
+    // };
     getData();
   }
   
+  void dispose(){
+    super.dispose();
+    razorpay.clear();
+  }
+
   void handlerPaymentSuccess(){
     print("Pament success");
     Toast.show("Pament success", context);
@@ -354,7 +429,7 @@ class _CartPageState extends State<CartPage> {
                 children: [
                   Text("Total",style: TextStyle(fontSize:14,fontWeight: FontWeight.w500)),
                   Spacer(),
-                  Text(totalPrice.toString())
+                  Text("\$" + totalPrice.toString())
                 ],
               ),
             ),

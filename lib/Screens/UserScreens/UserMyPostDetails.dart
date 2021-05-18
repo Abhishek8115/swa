@@ -24,6 +24,23 @@ class _UserPostItemDetailState extends State<UserPostItemDetail> {
     super.initState();
     print(widget.details);
   }
+
+  // Future<String> getData() async {
+  //   http.Response  response = await http.get('$path/product',);   
+  //   Map<String, dynamic> prodlst = jsonDecode(response.body);
+  //   widget.pl = prodlst['data']['products'] as List;
+  //   http.Response  result = await http.get('$path/category',);   
+  //   Map<dynamic, dynamic> catlst = jsonDecode(result.body);
+  //   print('getData called');
+  //   print(widget.catList);
+  //   setState(() {
+  //     print("setState called");      
+  //     productFlag = true;
+  //     //Navigator.pop(context);
+  //   });
+    
+  // }
+
   void delete()async{
     Navigator.pop(context);
     showGeneralDialog(
@@ -103,7 +120,13 @@ class _UserPostItemDetailState extends State<UserPostItemDetail> {
       context: context,
       pageBuilder: (context, animation1, animation2) {}
     );      
-    Future.delayed(Duration(milliseconds: 2000)).then((onValue)=>Navigator.pop(context));                       
+    Future.delayed(Duration(milliseconds: 2000)).then((onValue){
+      Navigator.pop(context);
+      Navigator.pop(context);
+      Navigator.pop(context);   
+      print("All pops are called");     
+    });  
+                          
   }
   @override
   Widget build(BuildContext context) {
@@ -207,6 +230,7 @@ class _UserPostItemDetailState extends State<UserPostItemDetail> {
                                         ),
                                         onPressed: () async{
                                             await delete();
+                                           
                                           setState(() {
                                            
                                           });

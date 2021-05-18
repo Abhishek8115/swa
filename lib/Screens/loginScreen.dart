@@ -112,7 +112,7 @@ class _LoginPageState extends State<LoginPage>
   @override
   void initState() {
     super.initState();
-    // if (Platform.isAndroid) WebView.platform = SurfaceAndroidWebView();
+    if (Platform.isAndroid) WebView.platform = SurfaceAndroidWebView();
     // options = {
     //   'key': 'rzp_test_1ns0ChyiK9yBT1',
     //   'amount': 50000, //in the smallest currency sub-unit.

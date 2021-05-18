@@ -39,7 +39,7 @@ class MyPosts_UserState extends State<MyPosts_User> {
   void initState() {
     super.initState();
     //print(widget.pl);
-    //this.getData();
+    getData();
   }
 
   @override

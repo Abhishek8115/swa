@@ -126,7 +126,15 @@ class _UserDashboardState extends State<UserDashboard> {
     //   context: context,
     //   pageBuilder: (context, animation1, animation2) {}
     // );
-   http.Response  response = await http.get('$path/product',);
+    http.Response  result = await http.get('$path/category',);   
+    Map<dynamic, dynamic> catlst = jsonDecode(result.body);
+    print('getData called');
+    print(catlst['data']['categories']);
+    catList = catlst['data']['categories'];
+    if(catList.length == 0){
+      catList[0] = "nothing";
+    }
+    http.Response  response = await http.get('$path/product?category=${catList[0]}',);
    
    
   //  Navigator.pop(context);
@@ -135,11 +143,7 @@ class _UserDashboardState extends State<UserDashboard> {
     Map<String, dynamic> prodlst = jsonDecode(response.body);
     print(prodlst['data']['products']);
     productList = prodlst['data']['products'];
-    http.Response  result = await http.get('$path/category',);   
-    Map<dynamic, dynamic> catlst = jsonDecode(result.body);
-    print('getData called');
-    print(catlst['data']['categories']);
-    catList = catlst['data']['categories'];
+    
   // productList = jsonDecode(t2);
   // print("String t2 : $t2");
     print("about to crash");
@@ -671,47 +675,46 @@ class _UserDashboardState extends State<UserDashboard> {
           )
         ],
       ),
-      body: 
-      productFlag?UserFlashSale(pl: productList, catList: catList):
-      Center(
-        child:RefreshIndicator(
+      body: UserFlashSale(pl: productList, catList: catList)
+      // productFlag?UserFlashSale(pl: productList, catList: catList):
+      // Center(
+      //   child:RefreshIndicator(
           
-          onRefresh: () async{
-              print("it is called");
-              http.Response  response = await http.get('$path/product',);   
-              Map<String, dynamic> prodlst = jsonDecode(response.body);
-              print(response.body);
-              productList = prodlst['data']['products'] as List;
-              print(productList.length);
-              if(productList.length > 0)
-              {
-                productFlag = true;
-                setState(() {});
-              }
-              // return Future.delayed(
-              //   Duration(seconds: 1),
-              //   () {
-              //       //print("refreshed");
-              //     // showSnackBar(
-              //     //   SnackBar(
-              //     //     content: const Text('Page Refreshed'),
-              //     //   ),
-              //     // );
-              //   },
-              // );
-            },
-          child: ListView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            children: <Widget>[
-              Padding(
-                padding:  EdgeInsets.fromLTRB(size.width*0.15, size.height*0.4, size.width*0.0, size.height*0),
-                child: Text("Nothing added", style: TextStyle(color: Colors.black54, fontSize:size.height*0.05)
-                  ),
-              ),
-            ],
-          ),
-        )
-      )          
+      //     onRefresh: () async{
+      //         print("it is called");
+      //          if(catList.length == 0){
+      //           catList[0] = "nothing";
+      //         }
+      //         http.Response  response = await http.get('$path/product?category=${catList[0]}',);
+      //         Map<String, dynamic> prodlst = jsonDecode(response.body);
+      //         print(response.body);
+      //         productList = prodlst['data']['products'] as List;
+      //         print(productList.length);
+      //         if(productList.length > 0)
+      //         {
+      //           print("2. productList length: "+productList.length.toString());
+      //           productFlag = true;
+      //           setState(() {});
+      //         }
+      //         else if(productList.length == 0)
+      //         {
+      //           print("2. productList length: "+productList.length.toString());
+      //           productFlag = false;
+      //           setState(() {});
+      //         }
+      //       },
+      //     child: ListView(
+      //       physics: const AlwaysScrollableScrollPhysics(),
+      //       children: <Widget>[
+              // Padding(
+              //   padding:  EdgeInsets.fromLTRB(size.width*0.15, size.height*0.4, size.width*0.0, size.height*0),
+              //   child: Text("Nothing added", style: TextStyle(color: Colors.black54, fontSize:size.height*0.05)
+              //     ),
+              // ),
+      //       ],
+      //     ),
+      //   )
+      // )          
       // Column(
       //   children: [
       //     SizedBox(

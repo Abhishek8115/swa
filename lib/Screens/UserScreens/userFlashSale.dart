@@ -104,6 +104,12 @@ class UserFlashSaleState extends State<UserFlashSale> {
             // physics: const AlwaysScrollableScrollPhysics(),
             children: <Widget>[
               CategoriesList(categories: widget.catList),
+              widget.pl.length == 0?
+              Padding(
+                padding:  EdgeInsets.symmetric(vertical : size.height*0.3),
+                child: Text("Nothing added", style: TextStyle(color: Colors.black54, fontSize:size.height*0.05)
+                  ),
+              ):
               Expanded(
                 child: Container(
                   padding: EdgeInsets.fromLTRB(size.width*0.00, 0, 0, size.height*0.02),

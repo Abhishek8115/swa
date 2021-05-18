@@ -492,10 +492,46 @@ class _UserUpdateItemState extends State<UserUpdateItem> with TickerProviderStat
           InkWell(
             onTap: () async {
               await updateItems();
-              // Future.delayed(Duration(milliseconds: 3000)).then((onValue)=>
-              //   //Navigator.pop(context)
-              //   print("Done")
-              // );
+              showGeneralDialog(
+                barrierColor: Colors.black.withOpacity(0.5),
+                transitionBuilder: (context, a1, a2, widget) {
+                  return Transform.scale(
+                    scale: a1.value,
+                    child: Opacity(
+                      opacity: a1.value,
+                      child: AlertDialog(
+                      title:Column( 
+                        children:<Widget>[
+                          // CircularProgressIndicator(
+                          //   backgroundColor: Colors.indigo, 
+                          //   //valueColor: _animationController.drive(ColorTween(begin: Colors.indigo, end: Colors.deepPurple[100])),                  
+                          //   strokeWidth: 6.0,
+                          // ),
+                          //SizedBox(width: MediaQuery.of(context).size.width*0.05),
+                          Image.asset("assets/successful.gif",
+                            height: MediaQuery.of(context).size.height * 0.1,
+                            width: MediaQuery.of(context).size.width * 0.3,
+                          ),
+                          SizedBox(width: MediaQuery.of(context).size.width*0.05),
+                          Text("Product deleted")
+                        ]
+                      )
+                    ),
+                    ),
+                  );
+                },
+                transitionDuration: Duration(milliseconds: 300),
+                barrierDismissible: false,
+                barrierLabel: '',
+                context: context,
+                pageBuilder: (context, animation1, animation2) {}
+              );      
+              Future.delayed(Duration(milliseconds: 2000)).then((onValue){
+                Navigator.pop(context);
+                Navigator.pop(context);
+                Navigator.pop(context);   
+                print("All pops are called");     
+              }); 
             },
             child: Padding(
               padding: EdgeInsets.fromLTRB(size.width*0.3, 0, size.width*0.3, 0),
