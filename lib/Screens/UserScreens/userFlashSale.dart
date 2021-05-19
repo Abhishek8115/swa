@@ -11,6 +11,7 @@ import 'package:swap/global.dart';
 
 List productList = [];
 List catList ;
+int selectedIndex = 0;
 class UserFlashSale extends StatefulWidget {
 List pl, catList;
 UserFlashSale ({ Key key, this.pl , this.catList}): super(key: key);
@@ -36,18 +37,51 @@ class UserFlashSaleState extends State<UserFlashSale> {
   // }
  
   Future<String> getData() async {
-    http.Response  response = await http.get('$path/product',);   
+    showGeneralDialog(
+      barrierColor: Colors.black.withOpacity(0.5),
+      transitionBuilder: (context, a1, a2, widget) {
+        return Transform.scale(
+          scale: a1.value,
+          child: Opacity(
+            opacity: a1.value,
+            child: AlertDialog(
+            title:Row( 
+              children:<Widget>[
+                CircularProgressIndicator(
+                  backgroundColor: Colors.blue[100], 
+                  //valueColor: _animationController.drive(ColorTween(begin: Colors.indigo, end: Colors.deepPurple[100])),                  
+                  strokeWidth: 6.0,
+                ),
+                SizedBox(width: MediaQuery.of(context).size.width*0.1),
+                Text("Loading")
+              ]
+            )
+          ),
+          ),
+        );
+      },
+      transitionDuration: Duration(milliseconds: 300),
+      barrierDismissible: false,
+      barrierLabel: '',
+      context: context,
+      pageBuilder: (context, animation1, animation2) {}
+    );
+    http.Response  result = await http.get('$path/category',);   
+    Map<dynamic, dynamic> catlst = {};
+    catlst = jsonDecode(result.body);
+    print('getData called');
+    //print(catlst['data']['categories']);
+    widget.catList = catlst['data']['categories'];
+    print("\n \n \n \n ${widget.catList[0]['name'].toString()}");
+
+    http.Response  response = await http.get('$path/product?category=${widget.catList[0]['name'].toString()}');
     Map<String, dynamic> prodlst = jsonDecode(response.body);
     widget.pl = prodlst['data']['products'] as List;
-    // print(productList.length);
-    // productList[0]['price'];
-    http.Response  result = await http.get('$path/category',);   
-    Map<dynamic, dynamic> catlst = jsonDecode(result.body);
-    print('getData called');
-    print(catlst['data']['categories']);
-    widget.catList = catlst['data']['categories'];
-    print("\n \n \n \n ${widget.catList}");
-    //Navigator.pop(context);
+
+    if(widget.pl.length == 0)
+      print("The products are empty");
+    print(widget.pl);
+    Navigator.pop(context);
     setState(() {
         productFlag = true;
     });
@@ -69,7 +103,7 @@ class UserFlashSaleState extends State<UserFlashSale> {
     //Navigator.pop(context);
     //print(pl['data']['products']);
     //print(productList.length);
-    //this.getData();
+    //getData();
   }
 
   @override
@@ -85,32 +119,109 @@ class UserFlashSaleState extends State<UserFlashSale> {
       //   panelBuilder: (scrollController) =>
       //       buildSlidingPanel(scrollController: scrollController),
         body: 
-        RefreshIndicator(
-          onRefresh: () {
-              getData();
-              return Future.delayed(
-                Duration(seconds: 1),
-                () {
-                    //print("refreshed");
-                  // showSnackBar(
-                  //   SnackBar(
-                  //     content: const Text('Page Refreshed'),
-                  //   ),
-                  // );
-                },
-              );
-            },
-          child: Column(
-            // physics: const AlwaysScrollableScrollPhysics(),
-            children: <Widget>[
-              CategoriesList(categories: widget.catList),
-              widget.pl.length == 0?
-              Padding(
-                padding:  EdgeInsets.symmetric(vertical : size.height*0.3),
-                child: Text("Nothing added", style: TextStyle(color: Colors.black54, fontSize:size.height*0.05)
-                  ),
-              ):
-              Expanded(
+        Column(
+          // physics: const AlwaysScrollableScrollPhysics(),
+          children: <Widget>[
+            SizedBox(
+              height: 50,
+                  child: ListView.builder(
+                shrinkWrap: true,
+                scrollDirection: Axis.horizontal,
+                itemCount: widget.catList==null?0:widget.catList.length,
+                itemBuilder: (BuildContext context, index){
+                  return Padding(
+                    padding:  EdgeInsets.fromLTRB(0, size.height*0.01,size.width*0.02,size.height*0.005),
+                    child: GestureDetector(
+                      onTap: ()async{
+                        //await getData();
+                        showGeneralDialog(
+                          barrierColor: Colors.black.withOpacity(0.5),
+                          transitionBuilder: (context, a1, a2, widget) {
+                            return Transform.scale(
+                              scale: a1.value,
+                              child: Opacity(
+                                opacity: a1.value,
+                                child: AlertDialog(
+                                title:Row( 
+                                  children:<Widget>[
+                                    CircularProgressIndicator(
+                                      backgroundColor: Colors.blue[100], 
+                                      //valueColor: _animationController.drive(ColorTween(begin: Colors.indigo, end: Colors.deepPurple[100])),                  
+                                      strokeWidth: 6.0,
+                                    ),
+                                    SizedBox(width: MediaQuery.of(context).size.width*0.1),
+                                    Text("Loading")
+                                  ]
+                                )
+                              ),
+                              ),
+                            );
+                          },
+                          transitionDuration: Duration(milliseconds: 300),
+                          barrierDismissible: false,
+                          barrierLabel: '',
+                          context: context,
+                          pageBuilder: (context, animation1, animation2) {}
+                        );
+                        http.Response  response = await http.get('$path/product?category=${widget.catList[index]['name'].toString()}');
+                        Map<String, dynamic> prodlst = jsonDecode(response.body);
+                        widget.pl = prodlst['data']['products'] as List;
+                        
+                        if(widget.pl.length == 0)
+                          print("The products are empty");
+                        print(widget.pl);
+                        Navigator.pop(context);
+                        setState(() {
+                          print(index);
+                          selectedIndex = index;
+                        });
+                      },
+                      child: Container(
+                        height: size.height*0.0,
+                        decoration: BoxDecoration(
+                          color: index==selectedIndex?Colors.grey[200]:Colors.white,
+                          borderRadius: BorderRadius.circular(size.height*0.05),
+                          boxShadow: index==selectedIndex?[
+                            BoxShadow(
+                              color: Colors.grey,
+                              offset: Offset(0.0, 1.0), //(x,y)
+                              blurRadius: 6.0,
+                            ),
+                          ]:null,
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.all(size.height*0.01),
+                          child: Center(child: Text(widget.catList[index]['name'])),
+                        ),
+                      ),
+                    ),
+                  );
+              }),
+            ),
+            // CategoriesList(categories: widget.catList),
+            widget.pl.length == 0?
+            RefreshIndicator(
+              onRefresh: () async{
+                print("It is called");
+                await getData();
+              },
+              child: Padding(
+              padding:  EdgeInsets.symmetric(vertical : size.height*0.3),
+              child: ListView(
+                shrinkWrap: true,
+                children: <Widget>[
+                  Expanded(
+                  child: Text("Nothing added", style: TextStyle(color: Colors.black54, fontSize:size.height*0.05))),
+                ],
+                ),
+              ),
+            ):
+            RefreshIndicator(
+              onRefresh: ()async{
+                print("It is called");
+                await getData();
+              },
+              child: Expanded(
                 child: Container(
                   padding: EdgeInsets.fromLTRB(size.width*0.00, 0, 0, size.height*0.02),
                   child:GridView.builder(
@@ -247,8 +358,8 @@ class UserFlashSaleState extends State<UserFlashSale> {
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         )
         ,
       //),

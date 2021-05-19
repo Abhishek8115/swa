@@ -517,7 +517,7 @@ class _EditPostState extends State<EditPost> with TickerProviderStateMixin {
             child: TextFormField(
                 onTap: () {
                   // SystemChannels.textInput.invokeMethod('TextInput.hide');
-                  FocusManager.instance.primaryFocus.unfocus();
+                  //FocusManager.instance.primaryFocus.unfocus();
                   setState(() {
                    
                   });

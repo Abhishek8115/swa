@@ -129,23 +129,25 @@ class _UserDashboardState extends State<UserDashboard> {
     http.Response  result = await http.get('$path/category',);   
     Map<dynamic, dynamic> catlst = jsonDecode(result.body);
     print('getData called');
-    print(catlst['data']['categories']);
+    //print(catlst['data']['categories']);
     catList = catlst['data']['categories'];
     if(catList.length == 0){
       catList[0] = "nothing";
+      print(catList[0]['name'].toString());
     }
-    http.Response  response = await http.get('$path/product?category=${catList[0]}',);
+    else{
+      //cat = catList[0];
+      print(catList[0]['name'].toString());
+    }
+    print("Ok till here");
+    http.Response  response = await http.get('$path/product?category=${catList[0]['name'].toString()}');
    
-   
-  //  Navigator.pop(context);
-  //  Navigator.pop(context);
-  //  Navigator.pop(context);
-    Map<String, dynamic> prodlst = jsonDecode(response.body);
-    print(prodlst['data']['products']);
-    productList = prodlst['data']['products'];
     
-  // productList = jsonDecode(t2);
-  // print("String t2 : $t2");
+    Map<String, dynamic> prodlst = jsonDecode(response.body);
+    //print(prodlst['data']['products']);
+    productList = prodlst['data']['products'];
+    print(productList);
+    //Navigator.pop(context);
     print("about to crash");
     // List productList = prodlst['data']['products'] as List;
     print(productList.length);
@@ -153,10 +155,8 @@ class _UserDashboardState extends State<UserDashboard> {
     //   print(i);
     if(productList.length!=0)
     { 
-      productFlag = true;
+      // productFlag = true;
       print("Everyting loaded");
-      //Navigator.pop(context);
-       //Navigator.pop(context);
       setState(() {      
       });
     }
@@ -464,7 +464,7 @@ class _UserDashboardState extends State<UserDashboard> {
               File file3 = File('${directory.path}/token.txt');
               String token = await file3.readAsString();
                http.Response response = await http.get(
-                "${path}/user/orders",
+                "${path}/order",
                 headers:{
                   "Authorization":"Bearer $token",
                 }
@@ -500,7 +500,7 @@ class _UserDashboardState extends State<UserDashboard> {
               );
               print(response.body);
               Map<String, dynamic> prodlst = jsonDecode(response.body);
-              List orderList = prodlst['data']['orders'] as List;
+              List<dynamic> orderList = prodlst['data']['orders'] as List;
               Navigator.pop(context);
               Navigator.push(
                   context,
@@ -675,7 +675,35 @@ class _UserDashboardState extends State<UserDashboard> {
           )
         ],
       ),
-      body: UserFlashSale(pl: productList, catList: catList)
+      body:
+      //RefreshIndicator(
+          
+          // onRefresh: () async{
+          //     print("it is called");
+          //      if(catList.length == 0){
+          //       catList[0] = "nothing";
+          //     }
+          //     http.Response  response = await http.get('$path/product?category=${catList[0]}',);
+          //     Map<String, dynamic> prodlst = jsonDecode(response.body);
+          //     print(response.body);
+          //     productList = prodlst['data']['products'] as List;
+          //     print(productList.length);
+          //     if(productList.length > 0)
+          //     {
+          //       print("2. productList length: "+productList.length.toString());
+          //       productFlag = true;
+          //       setState(() {});
+          //     }
+          //     else if(productList.length == 0)
+          //     {
+          //       print("2. productList length: "+productList.length.toString());
+          //       productFlag = false;
+          //       setState(() {});
+          //     }
+          //   },
+          //child:  
+          UserFlashSale(pl: productList, catList: catList)
+        //)
       // productFlag?UserFlashSale(pl: productList, catList: catList):
       // Center(
       //   child:RefreshIndicator(
@@ -706,11 +734,11 @@ class _UserDashboardState extends State<UserDashboard> {
       //     child: ListView(
       //       physics: const AlwaysScrollableScrollPhysics(),
       //       children: <Widget>[
-              // Padding(
-              //   padding:  EdgeInsets.fromLTRB(size.width*0.15, size.height*0.4, size.width*0.0, size.height*0),
-              //   child: Text("Nothing added", style: TextStyle(color: Colors.black54, fontSize:size.height*0.05)
-              //     ),
-              // ),
+      //         Padding(
+      //           padding:  EdgeInsets.fromLTRB(size.width*0.15, size.height*0.4, size.width*0.0, size.height*0),
+      //           child: Text("Nothing added", style: TextStyle(color: Colors.black54, fontSize:size.height*0.05)
+      //             ),
+      //         ),
       //       ],
       //     ),
       //   )
