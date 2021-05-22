@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:swap/Screens/UserScreens/UserOrders.dart';
+import 'package:swap/Screens/UserScreens/OrdersForMe.dart';
 import 'package:swap/Screens/BusinessScreens/BusinessSupport.dart';
 import 'package:swap/Screens/BusinessScreens/ChatPage.dart';
 import 'package:swap/Screens/UserScreens/MyPostUser.dart';
@@ -461,14 +462,8 @@ class _UserDashboardState extends State<UserDashboard> {
           InkWell(
             onTap: () async{
               Directory directory = await getApplicationDocumentsDirectory();
-              File file3 = File('${directory.path}/token.txt');
-              String token = await file3.readAsString();
-               http.Response response = await http.get(
-                "${path}/order",
-                headers:{
-                  "Authorization":"Bearer $token",
-                }
-              );
+              File file3 = File('${directory.path}/userId.txt');
+              String userId = await file3.readAsString();               
               showGeneralDialog(
                 barrierColor: Colors.black.withOpacity(0.5),
                 transitionBuilder: (context, a1, a2, widget) {
@@ -480,7 +475,7 @@ class _UserDashboardState extends State<UserDashboard> {
                       title:Row( 
                         children:<Widget>[
                           CircularProgressIndicator(
-                            backgroundColor: Colors.indigo, 
+                            backgroundColor: Colors.lightBlue[100],
                             //valueColor: _animationController.drive(ColorTween(begin: Colors.indigo, end: Colors.deepPurple[100])),                  
                             strokeWidth: 6.0,
                           ),
@@ -498,6 +493,7 @@ class _UserDashboardState extends State<UserDashboard> {
                 context: context,
                 pageBuilder: (context, animation1, animation2) {}
               );
+              http.Response response = await http.get("${path}/order/orders_by_me/$userId",);
               print(response.body);
               Map<String, dynamic> prodlst = jsonDecode(response.body);
               List<dynamic> orderList = prodlst['data']['orders'] as List;
@@ -518,11 +514,70 @@ class _UserDashboardState extends State<UserDashboard> {
                   ),
                   child: Image.asset("assets/bell.png", fit: BoxFit.cover),
                 ),
+                title: Text("My orders"),
+              ),
+            ),
+          ),
+          InkWell(
+            onTap: () async{
+              Directory directory = await getApplicationDocumentsDirectory();
+              File file3 = File('${directory.path}/userId.txt');
+              String userId = await file3.readAsString();               
+              showGeneralDialog(
+                barrierColor: Colors.black.withOpacity(0.5),
+                transitionBuilder: (context, a1, a2, widget) {
+                  return Transform.scale(
+                    scale: a1.value,
+                    child: Opacity(
+                      opacity: a1.value,
+                      child: AlertDialog(
+                      title:Row( 
+                        children:<Widget>[
+                          CircularProgressIndicator(
+                            backgroundColor: Colors.lightBlue[100],
+                            //valueColor: _animationController.drive(ColorTween(begin: Colors.indigo, end: Colors.deepPurple[100])),                  
+                            strokeWidth: 6.0,
+                          ),
+                          SizedBox(width: size.width*0.1),
+                          Text("Loading")
+                        ]
+                      )
+                    ),
+                    ),
+                  );
+                },
+                transitionDuration: Duration(milliseconds: 300),
+                barrierDismissible: false,
+                barrierLabel: '',
+                context: context,
+                pageBuilder: (context, animation1, animation2) {}
+              );
+              http.Response response = await http.get("${path}/order/orders_for_me/$userId",);
+              print(response.body);
+              Map<String, dynamic> prodlst = jsonDecode(response.body);
+              List<dynamic> orderList = prodlst['data']['orders'] as List;
+              Navigator.pop(context);
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => Order_for_me(orders: orderList)));
+              // Navigator.push(context, MaterialPageRoute(builder: (context) => Parking_Lot_Screen()));
+            },
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+              child: ListTile(
+                leading: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: 30,
+                    maxHeight: 30,
+                  ),
+                  child: Icon(Icons.notifications_active, color: Colors.blue),
+                  // Image.asset("assets/bell.png", fit: BoxFit.cover),
+                ),
                 title: Text("Orders"),
               ),
             ),
           ),
-
           InkWell(
             onTap: () {
               Navigator.push(

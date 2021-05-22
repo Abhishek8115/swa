@@ -260,7 +260,7 @@ class _UserPostItemDetailState extends State<UserPostItemDetail> {
               ),
               Padding(
                 padding: EdgeInsets.only(left: size.height*0.02 ),
-                child: Text("Description will be written here", style: TextStyle(color: Colors.black54, fontSize:size.height*0.025)),
+                child: Text(widget.details['description'], style: TextStyle(color: Colors.black54, fontSize:size.height*0.025)),
               ),
               SizedBox(
                 height: size.height*0.32

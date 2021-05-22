@@ -30,8 +30,14 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: ChatDetailPageAppBar(),
-      body: Stack(
+      backgroundColor: Colors.white70,
+      appBar: AppBar(
+        title: Text("Chat", style: TextStyle(color: Colors.black)),
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.white70,
+      ),
+      body: Stack(        
         children: <Widget>[
           ListView.builder(
             itemCount: chatMessage.length,
@@ -74,7 +80,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
               child: FloatingActionButton(
                 onPressed: (){},
                 child: Icon(Icons.send,color: Colors.white,),
-                backgroundColor: Colors.pink,
+                backgroundColor: Colors.purple[300],
                 elevation: 0,
               ),
             ),
