@@ -61,10 +61,10 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin {
         context: context,
         pageBuilder: (context, animation1, animation2) {});
         String resp = jsonEncode({
-          "email": "b7f2kjbdkjfbs36@gmail.com",
-          "phone": "43227njsdncjksd",
-          "password": "password",
-          "name": "abhishek" ,                
+          "email": email,
+          "phone": phoneNo,
+          "password": password,
+          "name": name ,                
           "role": sIndex == 0? 'business':'user'
         });
         print(resp);
@@ -74,10 +74,10 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin {
               "Content-Type": "application/json"
               },
             body: jsonEncode({
-            "email": "rgasds35@gmail.com",
-            "phone": "4asadfjhgjhaefgrg",
-            "password": "password",
-            "name": "abhishekSing" ,                
+            "email": email,
+            "phone": phoneNo,
+            "password": password,
+            "name": name ,                
             "role": sIndex == 0? 'business':'user'
             }
           )
@@ -372,71 +372,70 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin {
               Navigator.push(context,
                 MaterialPageRoute(builder: (context) => PhoneVerification())
               );
-              // if (username.text.isEmpty ||
-              //     phoneNo.text.isEmpty ||
-              //     email.text.isEmpty ||
-              //     password.text.isEmpty ||
-              //     selectedIndex == -1) {
-              //   return Toast.show("Please Enter Valid Details", context,
-              //       duration: 1,
-              //       gravity: 0,
-              //       backgroundColor: Colors.indigo[200]);
-                    
-              // }
-              // print(username.text.isEmpty);
-              // print("data sent");
-              // http.Response result = await pushData(
-              //     username.text.trim(), email.text.trim(), password.text.trim(), phoneNo.text.trim(), selectedIndex);
-              // Map<String , dynamic> d = jsonDecode(result.body);
-              //   userId = d['type'];
-              // if (result.statusCode == 200) {
-              //   print(result.body);
-              //   Navigator.pop(context);
-              //   Map<String , dynamic> d = jsonDecode(result.body);
-              //   Directory directory = await getApplicationDocumentsDirectory();
-              //   userId = d['data']['userId'];
-              //   File file2 = File('${directory.path}/userId.txt');
-              //   await file2.writeAsString(d['data']['userId']);
-              //   Navigator.push(context,
-              //       MaterialPageRoute(builder: (context) => PhoneVerification()));
-              // }
-              // else if(d['message'] == "Email already exists provider different email")
-              // {
-              //   print(result.body);
-              //   Navigator.pop(context);
-              //   return(
-              //    showGeneralDialog(
-              //     //barrierDismissible:true,
-              //     barrierColor: Colors.black.withOpacity(0.5),
-              //     transitionBuilder: (context, a1, a2, widget) {
-              //       return Transform.scale(
-              //         scale: a1.value,
-              //         child: Opacity(
-              //           opacity: a1.value,
-              //           child: AlertDialog(
-              //               title: Text("Email or Number already exist",
-              //                style: TextStyle(fontSize: size.height*0.02))),
-              //         ),
-              //       );
-              //     },
-              //     transitionDuration: Duration(milliseconds: 300),
-              //     barrierDismissible: true,
-              //     barrierLabel: '',
-              //     context: context,
-              //     pageBuilder: (context, animation1, animation2) {})
-              //   );
-              // }
-              // else
-              //  {
-              //    print(result.body);
-              //    Navigator.pop(context);
-              //     return(
-              //     Toast.show("Please Enter Valid Details", context,
-              //       duration: 1,
-              //       gravity: 0,
-              //       backgroundColor: Colors.indigo[200])
-              //   );
-              //  }
+              if (username.text.isEmpty ||
+                  phoneNo.text.isEmpty ||
+                  email.text.isEmpty ||
+                  password.text.isEmpty ||
+                  selectedIndex == -1) {
+                return Toast.show("Please Enter Valid Details", context,
+                  duration: 1,
+                  gravity: 0,
+                  backgroundColor: Colors.indigo[200]);                   
+              }
+              print(username.text.isEmpty);
+              print("data sent");
+              http.Response result = await pushData(
+                  username.text.trim(), email.text.trim(), password.text.trim(), phoneNo.text.trim(), selectedIndex);
+              Map<String , dynamic> d = jsonDecode(result.body);
+                userId = d['type'];
+              if (result.statusCode == 200) {
+                print(result.body);
+                Navigator.pop(context);
+                Map<String , dynamic> d = jsonDecode(result.body);
+                Directory directory = await getApplicationDocumentsDirectory();
+                userId = d['data']['userId'];
+                File file2 = File('${directory.path}/userId.txt');
+                await file2.writeAsString(d['data']['userId']);
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => PhoneVerification()));
+              }
+              else if(d['message'] == "Email already exists provider different email")
+              {
+                print(result.body);
+                Navigator.pop(context);
+                return(
+                 showGeneralDialog(
+                  //barrierDismissible:true,
+                  barrierColor: Colors.black.withOpacity(0.5),
+                  transitionBuilder: (context, a1, a2, widget) {
+                    return Transform.scale(
+                      scale: a1.value,
+                      child: Opacity(
+                        opacity: a1.value,
+                        child: AlertDialog(
+                            title: Text("Email or Number already exist",
+                             style: TextStyle(fontSize: size.height*0.02))),
+                      ),
+                    );
+                  },
+                  transitionDuration: Duration(milliseconds: 300),
+                  barrierDismissible: true,
+                  barrierLabel: '',
+                  context: context,
+                  pageBuilder: (context, animation1, animation2) {})
+                );
+              }
+              else
+               {
+                 print(result.body);
+                 Navigator.pop(context);
+                  return(
+                  Toast.show("Please Enter Valid Details", context,
+                    duration: 1,
+                    gravity: 0,
+                    backgroundColor: Colors.indigo[200])
+                );
+               }
             },
             child: Padding(
               padding: EdgeInsets.fromLTRB(20, 0, 20, 0),

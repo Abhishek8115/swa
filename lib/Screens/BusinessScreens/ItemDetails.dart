@@ -38,7 +38,7 @@ class _ItemDetailState extends State<ItemDetail> {
                               //color: Colors.blue,
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: Text(widget.details['_id'],
+                                child: Text(widget.details['name'],
                                 maxLines:2,
                                 style: TextStyle(fontSize:25,fontWeight: FontWeight.w500),),
                               ),
@@ -63,7 +63,7 @@ class _ItemDetailState extends State<ItemDetail> {
                         ),
                         Padding(
                           padding: EdgeInsets.fromLTRB(size.width*0.04, 0, 0, 0),
-                          child: Text("Best before ${widget.details['createdAt']}", style: TextStyle(color: Colors.black54)),
+                          child: Text("Best before ${widget.details['createdAt'].toString().substring(0,10)}", style: TextStyle(color: Colors.black54)),
                         ),
                         SizedBox(
                           height: size.height*0.02,
@@ -74,7 +74,7 @@ class _ItemDetailState extends State<ItemDetail> {
                         ),
                         Padding(
                           padding: EdgeInsets.only(left: size.height*0.02 ),
-                          child: Text("Description will be written here", style: TextStyle(color: Colors.black54, fontSize:size.height*0.025)),
+                          child: Text("${widget.details['description']}", style: TextStyle(color: Colors.black54, fontSize:size.height*0.025)),
                         ),
                         SizedBox(
                           height: size.height*0.32

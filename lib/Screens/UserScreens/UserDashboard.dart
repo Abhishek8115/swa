@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:swap/Screens/UserScreens/UserOrders.dart';
 import 'package:swap/Screens/UserScreens/OrdersForMe.dart';
 import 'package:swap/Screens/BusinessScreens/BusinessSupport.dart';
-import 'package:swap/Screens/BusinessScreens/ChatPage.dart';
+import 'package:swap/Screens/UserScreens/UserEditProfile.dart';
 import 'package:swap/Screens/UserScreens/MyPostUser.dart';
 import 'package:swap/Screens/BusinessScreens/Wallet.dart';
 import 'package:swap/Screens/UserScreens/UserAddItems.dart';
@@ -353,7 +353,7 @@ class _UserDashboardState extends State<UserDashboard> {
           ),
             InkWell(
             onTap: (){
-              //Navigator.push(context, MaterialPageRoute(builder: (context) =>BusinessEditProfile()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) =>BusinessEditProfile()));
             },
             child: Padding(
               padding: const EdgeInsets.fromLTRB(10, 0, 0,0),
@@ -366,27 +366,6 @@ class _UserDashboardState extends State<UserDashboard> {
                   child: Icon(Icons.mode_edit),
                 ),
                 title: Text("Edit Profile"),
-              ),
-            ),
-          ),
-          InkWell(
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => Business_ChatPage()));
-            },
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-              child: ListTile(
-                leading: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: 30,
-                    maxHeight: 30,
-                  ),
-                  child: Image.asset("assets/chat.png", fit: BoxFit.cover),
-                ),
-                title: Text("Chat"),
               ),
             ),
           ),
@@ -578,28 +557,28 @@ class _UserDashboardState extends State<UserDashboard> {
               ),
             ),
           ),
-          InkWell(
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => Business_Support()));
-            },
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-              child: ListTile(
-                leading: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: 30,
-                    maxHeight: 30,
-                  ),
-                  child:
-                      Image.asset("assets/support.png", fit: BoxFit.cover),
-                ),
-                title: Text("Support"),
-              ),
-            ),
-          ),
+          // InkWell(
+          //   onTap: () {
+          //     Navigator.push(
+          //         context,
+          //         MaterialPageRoute(
+          //             builder: (context) => Business_Support()));
+          //   },
+          //   child: Padding(
+          //     padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+          //     child: ListTile(
+          //       leading: ConstrainedBox(
+          //         constraints: BoxConstraints(
+          //           maxWidth: 30,
+          //           maxHeight: 30,
+          //         ),
+          //         child:
+          //             Image.asset("assets/support.png", fit: BoxFit.cover),
+          //       ),
+          //       title: Text("Support"),
+          //     ),
+          //   ),
+          // ),
           // InkWell(
           //   onTap: () {
           //     Navigator.push(
@@ -680,55 +659,55 @@ class _UserDashboardState extends State<UserDashboard> {
           ),
         ),
         title: Text("Dashboard", style: TextStyle(color: Colors.black)),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: new Container(
-              height: 150.0,
-              width: 30.0,
-              child: new GestureDetector(
-                onTap: () {
-                  setState(() {
-                    print("calling setState");
-                  });
-                },
-                child: Stack(
-                  children: <Widget>[
-                    new IconButton(
-                        icon: new Icon(
-                          Icons.shopping_cart,
-                          color: Colors.black,
-                        ),
-                        onPressed: () {
+        // actions: [
+        //   Padding(
+        //     padding: const EdgeInsets.all(10.0),
+        //     child: new Container(
+        //       height: 150.0,
+        //       width: 30.0,
+        //       child: new GestureDetector(
+        //         onTap: () {
+        //           setState(() {
+        //             print("calling setState");
+        //           });
+        //         },
+        //         child: Stack(
+        //           children: <Widget>[
+        //             new IconButton(
+        //                 icon: new Icon(
+        //                   Icons.shopping_cart,
+        //                   color: Colors.black,
+        //                 ),
+        //                 onPressed: () {
 
-                        }),
-                    itemCount == 0
-                        ? new Container()
-                        : new Positioned(
-                            child: new Stack(
-                            children: <Widget>[
-                              new Icon(Icons.brightness_1,
-                                  size: 20.0, color: Colors.orange.shade500),
-                              new Positioned(
-                                  top: 4.0,
-                                  right: 5.0,
-                                  child: new Center(
-                                    child: new Text(
-                                      itemCount.toString(),
-                                      style: new TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 11.0,
-                                          fontWeight: FontWeight.w500),
-                                    ),
-                                  )),
-                            ],
-                          )),
-                  ],
-                ),
-              ),
-            ),
-          )
-        ],
+        //                 }),
+        //             itemCount == 0
+        //                 ? new Container()
+        //                 : new Positioned(
+        //                     child: new Stack(
+        //                     children: <Widget>[
+        //                       new Icon(Icons.brightness_1,
+        //                           size: 20.0, color: Colors.orange.shade500),
+        //                       new Positioned(
+        //                           top: 4.0,
+        //                           right: 5.0,
+        //                           child: new Center(
+        //                             child: new Text(
+        //                               itemCount.toString(),
+        //                               style: new TextStyle(
+        //                                   color: Colors.white,
+        //                                   fontSize: 11.0,
+        //                                   fontWeight: FontWeight.w500),
+        //                             ),
+        //                           )),
+        //                     ],
+        //                   )),
+        //           ],
+        //         ),
+        //       ),
+        //     ),
+        //   )
+        // ],
       ),
       body:
       //RefreshIndicator(

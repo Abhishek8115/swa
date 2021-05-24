@@ -78,25 +78,54 @@ class _LoginPageState extends State<LoginPage>
     });
   }
 
+  Future<String> loadUserDetails()async
+  {                  
+    Directory directory = await getApplicationDocumentsDirectory(); 
+    File file2 = File('${directory.path}/userId.txt');
+    File file3 = File('${directory.path}/token.txt');
+    
+    String userId = await file2.readAsString();
+    String token = await file3.readAsString();
+    print("printing token : " +token);
+    print("printing userId : " +userId);
+    http.Response response = await http.get(
+      "${path}/profile/$userId",
+      headers: {
+        "Content-Type":"application/json",
+        "Accept":"application/json",
+        "Authorization":"Bearer $token"
+      }  
+    );
+    print("here");
+    Map<String, dynamic> userInfo = jsonDecode(response.body);
+    print(userInfo);
+    String userType = userInfo['data']['profile']['role'];
+    Navigator.pop(context);
+    //loaderFlag = true;
+    setState(() {});
+    return userType;
+    
+  }
+
   Future<http.Response> getData(String number, String password) async {
     final response = await http.post('https://food2swap.herokuapp.com/api/auth/login_with_username',
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(
           {
-            "username": "9358114227", 
-            "password": "12345678",
+            "username": number, 
+            "password": password,
           }
         )
       );
     //print('response: ${response.statusCode}');
   
-    if (response.statusCode == 200) {
-      print('Success');
-      return response;
-    } else if (response.statusCode == 400) {
-      print(response.statusCode);
-      return response;
-    }
+    // if (response.statusCode == 200) {
+    //   print('Success');
+    //   return response;
+    // } else if (response.statusCode == 400) {
+    //   print(response.statusCode);
+    //   return response;
+    // }
     return response;
   }
 
@@ -225,7 +254,7 @@ class _LoginPageState extends State<LoginPage>
                     cursorColor: Color(0xff90E5BF),
                     decoration: InputDecoration(
                         filled: true,
-                        hintText: "email or number",
+                        hintText: "phone number",
                         suffixIcon: Padding(
                           padding: const EdgeInsets.all(20.0),
                           child: GestureDetector(
@@ -333,78 +362,27 @@ class _LoginPageState extends State<LoginPage>
               context: context,
               pageBuilder: (context, animation1, animation2) {}
               );
-              http.Response result = await getData(username.text.trim(), password.text.trim());              
+              http.Response result = await getData(username.text.trim(), password.text.trim());                  
               loginDetails = jsonDecode(result.body);
-              
+              print(loginDetails);         
               // print(loginDetails['data']['token']);
               
               // token = loginDetails['token'];
               
-              //Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => LandingPage()), (Route<dynamic> route) => false);
+              // Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => LandingPage()), (Route<dynamic> route) => false);
 
               // print("hello");
               // print("email: ${username.text}");
               // print("password: ${password.text}");
-              // String result = await getData(username.text, password.text);
-              // if (result.contains("success!")) {
+              // http.Response result = await getData(username.text, password.text);
+              //if (result.contains("success!")) {
               if(loginDetails['type'] == 'success'){
                 Directory directory = await getApplicationDocumentsDirectory();
                 File file = File('${directory.path}/token.txt');
                 await file.writeAsString(loginDetails['data']['token']);
                 File file2 = File('${directory.path}/userId.txt');
                 await file2.writeAsString(loginDetails['data']['userId']);
-                // void loadUserDetails()async
-                // {
-                //   Directory directory = await getApplicationDocumentsDirectory(); 
-                //   File file2 = File('${directory.path}/userId.txt');
-                //   File file3 = File('${directory.path}/token.txt');
-                //   showGeneralDialog(
-                //     barrierColor: Colors.black.withOpacity(0.5),
-                //     transitionBuilder: (context, a1, a2, widget) {
-                //       return Transform.scale(
-                //         scale: a1.value,
-                //         child: Opacity(
-                //           opacity: a1.value,
-                //           child: AlertDialog(
-                //           title:Row( 
-                //             children:<Widget>[
-                //               CircularProgressIndicator(
-                //                 backgroundColor: Colors.indigo, 
-                //                 //valueColor: _animationController.drive(ColorTween(begin: Colors.indigo, end: Colors.deepPurple[100])),                  
-                //                 strokeWidth: 6.0,
-                //               ),
-                //               SizedBox(width: size.width*0.1),
-                //               Text("Loading")
-                //             ]
-                //           )
-                //         ),
-                //         ),
-                //       );
-                //     },
-                //     transitionDuration: Duration(milliseconds: 300),
-                //     barrierDismissible: false,
-                //     barrierLabel: '',                   
-                //     context: _scaffoldKey.currentContext,
-                //     pageBuilder: (context, animation1, animation2) {}
-                //   );
-                //   String userId = await file2.readAsString();
-                //   String token = await file3.readAsString();
-                //   print(token);
-                //   print(userId);
-                //   http.Response response = await http.get(
-                //     "${path}/profile/${userId}",
-                //     headers: {
-                //       "Content-Type":"application/json",
-                //       "Accept":"application/json",
-                //       "Authorization":"Bearer $token"
-                //     }  
-                //   );
-                //   userInfo = jsonDecode(response.body);
-                //   print(userInfo);
-                //   Navigator.pop(context);
-                //   loaderFlag = true;
-                //   setState(() {});
-                // }
+                
                 // void loadProductDetails()async
                 // {
                 //   showGeneralDialog(
@@ -444,11 +422,19 @@ class _LoginPageState extends State<LoginPage>
                 // productList = jsonDecode(response.body);
                 // print(productList);
                 // }
-                // loadProductDetails();
-                // loadUserDetails();
+                //loadProductDetails();
+                String userType = await loadUserDetails();
                 Navigator.pop(context);
-                Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (context) => UserDashboard()), (Route<dynamic> route) => false);
+                loginDetails = null;
+                if(userType == 'user'){ 
+                  Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => UserDashboard()), (Route<dynamic> route) => false);
+                }
+                else if( userType == 'business'){
+                  print("Calling Business DashBoard");
+                  Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => BusinessDashboard()), (Route<dynamic> route) => false);
+                }
                 loginDetails = null;
               }
               else{
@@ -461,6 +447,7 @@ class _LoginPageState extends State<LoginPage>
                     backgroundColor: Colors.indigo[200])
                 );
               }
+            //}
             },
             child: Padding(
               padding: EdgeInsets.fromLTRB(20, 0, 20, 0),

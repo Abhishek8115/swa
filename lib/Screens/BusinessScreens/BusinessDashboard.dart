@@ -1,20 +1,22 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:swap/Screens/BusinessScreens/BusinessOrders.dart';
-import 'package:swap/Screens/BusinessScreens/BusinessSupport.dart';
-import 'package:swap/Screens/BusinessScreens/ChatPage.dart';
-import 'package:swap/Screens/BusinessScreens/MyPosts.dart';
-import 'package:swap/Screens/BusinessScreens/Wallet.dart';
-import 'package:swap/Screens/BusinessScreens/AddItems.dart';
-import 'package:swap/Screens/BusinessScreens/ShopRoutine.dart';
 import 'package:swap/Screens/BusinessScreens/BusinessFlashSale.dart';
+import 'package:swap/Screens/UserScreens/UserOrders.dart';
+import 'package:swap/Screens/UserScreens/OrdersForMe.dart';
+import 'package:swap/Screens/BusinessScreens/BusinessSupport.dart';
+import 'package:swap/Screens/UserScreens/UserEditProfile.dart';
+import 'package:swap/Screens/UserScreens/MyPostUser.dart';
+import 'package:swap/Screens/BusinessScreens/Wallet.dart';
+import 'package:swap/Screens/UserScreens/UserAddItems.dart';
+import 'package:swap/Screens/BusinessScreens/ShopRoutine.dart';
 import 'package:swap/Widgets/CategoriesList.dart';
 import 'package:swap/Screens/Cart.dart';
+import 'package:swap/Screens/CartPage.dart';
 import 'package:swap/Screens/donate.dart';
 import 'package:swap/Screens/fresh_sale.dart';
 import 'package:swap/SplashScreen.dart';
 import 'package:swap/Models/DataSchema.dart';
-import 'BusinessEditProfile.dart';
+//import 'BusinessEditProfile.dart';
 import 'dart:io';
 import 'package:swap/global.dart';
 import 'package:path_provider/path_provider.dart';
@@ -23,10 +25,11 @@ import 'package:swap/Screens/loginScreen.dart';
 
 class BusinessDashboard extends StatefulWidget {
   @override
-  _BusinessDashboardState createState() => _BusinessDashboardState();
+  _UserDashboardState createState() => _UserDashboardState();
 }
 List productList = [];
-class _BusinessDashboardState extends State<BusinessDashboard> {
+List catList = [];
+class _UserDashboardState extends State<BusinessDashboard> {
   bool loaderFlag = false;
   bool productFlag = false;
   Map<String, dynamic> userInfo;
@@ -89,7 +92,7 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
     );
     userInfo = jsonDecode(response.body);
     //print(userInfo);
-    //Navigator.pop(context);
+    Navigator.pop(context);
     loaderFlag = true;
     setState(() {});
   }
@@ -124,29 +127,44 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
     //   context: context,
     //   pageBuilder: (context, animation1, animation2) {}
     // );
-   http.Response  response = await http.get('$path/product',);
+    http.Response  result = await http.get('$path/category',);   
+    Map<dynamic, dynamic> catlst = jsonDecode(result.body);
+    print('getData called');
+    //print(catlst['data']['categories']);
+    catList = catlst['data']['categories'];
+    if(catList.length == 0){
+      catList[0] = "nothing";
+      print(catList[0]['name'].toString());
+    }
+    else{
+      //cat = catList[0];
+      print(catList[0]['name'].toString());
+    }
+    print("Ok till here");
+    http.Response  response = await http.get('$path/product?category=${catList[0]['name'].toString()}');
    
-   
-  //  Navigator.pop(context);
-  //  Navigator.pop(context);
-  //  Navigator.pop(context);
-  
-   Map<String, dynamic> prodlst = jsonDecode(response.body);
-   //print(prodlst['data']['products']);
-   //List<String> t= jsonEncode(prodlst['data']['products']) as List;
-   //String t2 = jsonEncode(t);
-  //  productList = jsonDecode(t2);
-  //  print("String t2 : $t2");
-    List productList = prodlst['data']['products'] as List;
+    
+    Map<String, dynamic> prodlst = jsonDecode(response.body);
+    //print(prodlst['data']['products']);
+    productList = prodlst['data']['products'];
+    print(productList);
+    //Navigator.pop(context);
+    print("about to crash");
+    // List productList = prodlst['data']['products'] as List;
     print(productList.length);
     // for(var i in productList)
     //   print(i);
-    if(productList!=null)
-    {
-      productFlag = true;
-      Navigator.pop(context);
+    if(productList.length!=0)
+    { 
+      // productFlag = true;
+      print("Everyting loaded");
       setState(() {      
       });
+    }
+    else
+    {
+      List productList = prodlst['data']['products'] as List;
+      print(productList.length);
     }
     //print("map productList : $productList");
    //print("printing productList : $t");
@@ -268,11 +286,55 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
           ),
 
           InkWell(
-            onTap: () {
+            onTap: () async{
+              
+              Directory directory = await getApplicationDocumentsDirectory(); 
+              File file3 = File('${directory.path}/token.txt');
+              showGeneralDialog(
+                barrierColor: Colors.black.withOpacity(0.5),
+                transitionBuilder: (context, a1, a2, widget) {
+                  return Transform.scale(
+                    scale: a1.value,
+                    child: Opacity(
+                      opacity: a1.value,
+                      child: AlertDialog(
+                      title:Row( 
+                        children:<Widget>[
+                          CircularProgressIndicator(
+                            backgroundColor: Colors.indigo, 
+                            //valueColor: _animationController.drive(ColorTween(begin: Colors.indigo, end: Colors.deepPurple[100])),                  
+                            strokeWidth: 6.0,
+                          ),
+                          SizedBox(width: size.width*0.1),
+                          Text("Loading")
+                        ]
+                      )
+                    ),
+                    ),
+                  );
+                },
+                transitionDuration: Duration(milliseconds: 300),
+                barrierDismissible: false,
+                barrierLabel: '',
+                context: context,
+                pageBuilder: (context, animation1, animation2) {}
+              );
+              String token = await file3.readAsString();
+              print(token);
+              http.Response  response = await http.get('$path/product/my_products',
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": "Bearer $token"
+                }
+              );
+              Navigator.pop(context);
+              Map<String, dynamic> prodlst = jsonDecode(response.body);
+              print(prodlst['data']['products']);
+
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => MyPosts_Business()));
+                      builder: (context) => MyPosts_User(pl: prodlst['data']['products'], catList: catList)));
             },
             child: Padding(
               padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
@@ -307,50 +369,29 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
               ),
             ),
           ),
-          InkWell(
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => Business_ChatPage()));
-            },
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-              child: ListTile(
-                leading: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: 30,
-                    maxHeight: 30,
-                  ),
-                  child: Image.asset("assets/chat.png", fit: BoxFit.cover),
-                ),
-                title: Text("Chat"),
-              ),
-            ),
-          ),
-          InkWell(
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => CartScreen()));
-            },
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-              child: ListTile(
-                leading: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: 30,
-                    maxHeight: 30,
-                  ),
-                  child:
-                      Icon(Icons.shopping_cart_outlined, color: Colors.purpleAccent, size: MediaQuery.of(context).size.height*0.04)
-                      //Image.asset("assets/myposts.png", fit: BoxFit.cover),
-                ),
-                title: Text("Cart"),
-              ),
-            ),
-          ),
+          // InkWell(
+          //   onTap: () {
+          //     Navigator.push(
+          //         context,
+          //         MaterialPageRoute(
+          //             builder: (context) => CartPage()));
+          //   },
+          //   child: Padding(
+          //     padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+          //     child: ListTile(
+          //       leading: ConstrainedBox(
+          //         constraints: BoxConstraints(
+          //           maxWidth: 30,
+          //           maxHeight: 30,
+          //         ),
+          //         child:
+          //             Icon(Icons.shopping_cart_outlined, color: Colors.purpleAccent, size: MediaQuery.of(context).size.height*0.04)
+          //             //Image.asset("assets/myposts.png", fit: BoxFit.cover),
+          //       ),
+          //       title: Text("Cart"),
+          //     ),
+          //   ),
+          // ),
 
           // InkWell(
           //   onTap: (){
@@ -374,34 +415,93 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
           //   ),
           // ),
 
-          InkWell(
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => Wallet_Business()));
-            },
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-              child: ListTile(
-                leading: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: 30,
-                    maxHeight: 30,
-                  ),
-                  child:
-                      Image.asset("assets/wallet.png", fit: BoxFit.cover),
-                ),
-                title: Text("My Wallet"),
-              ),
-            ),
-          ),
+          // InkWell(
+          //   onTap: () {
+          //     Navigator.push(
+          //         context,
+          //         MaterialPageRoute(
+          //             builder: (context) => Wallet_Business()));
+          //   },
+          //   child: Padding(
+          //     padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+          //     child: ListTile(
+          //       leading: ConstrainedBox(
+          //         constraints: BoxConstraints(
+          //           maxWidth: 30,
+          //           maxHeight: 30,
+          //         ),
+          //         child:
+          //             Image.asset("assets/wallet.png", fit: BoxFit.cover),
+          //       ),
+          //       title: Text("My Wallet"),
+          //     ),
+          //   ),
+          // ),
 
+          // InkWell(
+          //   onTap: () async{
+          //     Directory directory = await getApplicationDocumentsDirectory();
+          //     File file3 = File('${directory.path}/userId.txt');
+          //     String userId = await file3.readAsString();               
+          //     showGeneralDialog(
+          //       barrierColor: Colors.black.withOpacity(0.5),
+          //       transitionBuilder: (context, a1, a2, widget) {
+          //         return Transform.scale(
+          //           scale: a1.value,
+          //           child: Opacity(
+          //             opacity: a1.value,
+          //             child: AlertDialog(
+          //             title:Row( 
+          //               children:<Widget>[
+          //                 CircularProgressIndicator(
+          //                   backgroundColor: Colors.lightBlue[100],
+          //                   //valueColor: _animationController.drive(ColorTween(begin: Colors.indigo, end: Colors.deepPurple[100])),                  
+          //                   strokeWidth: 6.0,
+          //                 ),
+          //                 SizedBox(width: size.width*0.1),
+          //                 Text("Loading")
+          //               ]
+          //             )
+          //           ),
+          //           ),
+          //         );
+          //       },
+          //       transitionDuration: Duration(milliseconds: 300),
+          //       barrierDismissible: false,
+          //       barrierLabel: '',
+          //       context: context,
+          //       pageBuilder: (context, animation1, animation2) {}
+          //     );
+          //     http.Response response = await http.get("${path}/order/orders_by_me/$userId",);
+          //     print(response.body);
+          //     Map<String, dynamic> prodlst = jsonDecode(response.body);
+          //     List<dynamic> orderList = prodlst['data']['orders'] as List;
+          //     Navigator.pop(context);
+          //     Navigator.push(
+          //         context,
+          //         MaterialPageRoute(
+          //             builder: (context) => User_Orders(orders: orderList)));
+          //     // Navigator.push(context, MaterialPageRoute(builder: (context) => Parking_Lot_Screen()));
+          //   },
+          //   child: Padding(
+          //     padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+          //     child: ListTile(
+          //       leading: ConstrainedBox(
+          //         constraints: BoxConstraints(
+          //           maxWidth: 30,
+          //           maxHeight: 30,
+          //         ),
+          //         child: Image.asset("assets/bell.png", fit: BoxFit.cover),
+          //       ),
+          //       title: Text("My orders"),
+          //     ),
+          //   ),
+          // ),
           InkWell(
             onTap: () async{
-               http.Response response = await http.get(
-                "${path}/order" 
-              );
+              Directory directory = await getApplicationDocumentsDirectory();
+              File file3 = File('${directory.path}/userId.txt');
+              String userId = await file3.readAsString();               
               showGeneralDialog(
                 barrierColor: Colors.black.withOpacity(0.5),
                 transitionBuilder: (context, a1, a2, widget) {
@@ -413,7 +513,7 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
                       title:Row( 
                         children:<Widget>[
                           CircularProgressIndicator(
-                            backgroundColor: Colors.indigo, 
+                            backgroundColor: Colors.lightBlue[100],
                             //valueColor: _animationController.drive(ColorTween(begin: Colors.indigo, end: Colors.deepPurple[100])),                  
                             strokeWidth: 6.0,
                           ),
@@ -431,13 +531,15 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
                 context: context,
                 pageBuilder: (context, animation1, animation2) {}
               );
+              http.Response response = await http.get("${path}/order/orders_for_me/$userId",);
+              print(response.body);
               Map<String, dynamic> prodlst = jsonDecode(response.body);
-              List orderList = prodlst['data']['orders'] as List;
+              List<dynamic> orderList = prodlst['data']['orders'] as List;
               Navigator.pop(context);
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => Business_Orders(orders: orderList)));
+                      builder: (context) => Order_for_me(orders: orderList)));
               // Navigator.push(context, MaterialPageRoute(builder: (context) => Parking_Lot_Screen()));
             },
             child: Padding(
@@ -448,35 +550,35 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
                     maxWidth: 30,
                     maxHeight: 30,
                   ),
-                  child: Image.asset("assets/bell.png", fit: BoxFit.cover),
+                  child: Icon(Icons.notifications_active, color: Colors.blue),
+                  // Image.asset("assets/bell.png", fit: BoxFit.cover),
                 ),
                 title: Text("Orders"),
               ),
             ),
           ),
-
-          InkWell(
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => Business_Support()));
-            },
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-              child: ListTile(
-                leading: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: 30,
-                    maxHeight: 30,
-                  ),
-                  child:
-                      Image.asset("assets/support.png", fit: BoxFit.cover),
-                ),
-                title: Text("Support"),
-              ),
-            ),
-          ),
+          // InkWell(
+          //   onTap: () {
+          //     Navigator.push(
+          //         context,
+          //         MaterialPageRoute(
+          //             builder: (context) => Business_Support()));
+          //   },
+          //   child: Padding(
+          //     padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+          //     child: ListTile(
+          //       leading: ConstrainedBox(
+          //         constraints: BoxConstraints(
+          //           maxWidth: 30,
+          //           maxHeight: 30,
+          //         ),
+          //         child:
+          //             Image.asset("assets/support.png", fit: BoxFit.cover),
+          //       ),
+          //       title: Text("Support"),
+          //     ),
+          //   ),
+          // ),
           InkWell(
             onTap: () {
               Navigator.push(
@@ -499,28 +601,28 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
               ),
             ),
           ),
-          // InkWell(
-          //   onTap: () {},
-          //   child: Padding(
-          //     padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-          //     child: ListTile(
-          //       leading: ConstrainedBox(
-          //         constraints: BoxConstraints(
-          //           maxWidth: 30,
-          //           maxHeight: 30,
-          //         ),
-          //         child: Image.asset("assets/faq.png", fit: BoxFit.cover),
-          //       ),
-          //       title: Text("FAQ"),
-          //     ),
-          //   ),
-          // ),
+          InkWell(
+            onTap: () {},
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+              child: ListTile(
+                leading: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: 30,
+                    maxHeight: 30,
+                  ),
+                  child: Image.asset("assets/faq.png", fit: BoxFit.cover),
+                ),
+                title: Text("FAQ"),
+              ),
+            ),
+          ),
 
           InkWell(
             onTap: () {
               Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => Splash()),
-                  (Route<dynamic> route) => false);
+                MaterialPageRoute(builder: (context) => Splash()),
+                (Route<dynamic> route) => false);
             },
             child: Padding(
               padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
@@ -557,62 +659,124 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
           ),
         ),
         title: Text("Dashboard", style: TextStyle(color: Colors.black)),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: new Container(
-              height: 150.0,
-              width: 30.0,
-              child: new GestureDetector(
-                onTap: () {
-                  setState(() {
-                    print("calling setState");
-                  });
-                },
-                child: Stack(
-                  children: <Widget>[
-                    new IconButton(
-                        icon: new Icon(
-                          Icons.shopping_cart,
-                          color: Colors.black,
-                        ),
-                        onPressed: () {
+        // actions: [
+        //   Padding(
+        //     padding: const EdgeInsets.all(10.0),
+        //     child: new Container(
+        //       height: 150.0,
+        //       width: 30.0,
+        //       child: new GestureDetector(
+        //         onTap: () {
+        //           setState(() {
+        //             print("calling setState");
+        //           });
+        //         },
+        //         child: Stack(
+        //           children: <Widget>[
+        //             new IconButton(
+        //                 icon: new Icon(
+        //                   Icons.shopping_cart,
+        //                   color: Colors.black,
+        //                 ),
+        //                 onPressed: () {
 
-                        }),
-                    itemCount == 0
-                        ? new Container()
-                        : new Positioned(
-                            child: new Stack(
-                            children: <Widget>[
-                              new Icon(Icons.brightness_1,
-                                  size: 20.0, color: Colors.orange.shade500),
-                              new Positioned(
-                                  top: 4.0,
-                                  right: 5.0,
-                                  child: new Center(
-                                    child: new Text(
-                                      itemCount.toString(),
-                                      style: new TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 11.0,
-                                          fontWeight: FontWeight.w500),
-                                    ),
-                                  )),
-                            ],
-                          )),
-                  ],
-                ),
-              ),
-            ),
-          )
-        ],
+        //                 }),
+        //             itemCount == 0
+        //                 ? new Container()
+        //                 : new Positioned(
+        //                     child: new Stack(
+        //                     children: <Widget>[
+        //                       new Icon(Icons.brightness_1,
+        //                           size: 20.0, color: Colors.orange.shade500),
+        //                       new Positioned(
+        //                           top: 4.0,
+        //                           right: 5.0,
+        //                           child: new Center(
+        //                             child: new Text(
+        //                               itemCount.toString(),
+        //                               style: new TextStyle(
+        //                                   color: Colors.white,
+        //                                   fontSize: 11.0,
+        //                                   fontWeight: FontWeight.w500),
+        //                             ),
+        //                           )),
+        //                     ],
+        //                   )),
+        //           ],
+        //         ),
+        //       ),
+        //     ),
+        //   )
+        // ],
       ),
-      body: 
-      productFlag?BusinessFlashSale(pl: productList):
-      Center(
-        child:Text("Nothing added", style: TextStyle(color: Colors.black54, fontSize:size.height*0.05)
-        )
-      )          
+      body:
+      //RefreshIndicator(
+          
+          // onRefresh: () async{
+          //     print("it is called");
+          //      if(catList.length == 0){
+          //       catList[0] = "nothing";
+          //     }
+          //     http.Response  response = await http.get('$path/product?category=${catList[0]}',);
+          //     Map<String, dynamic> prodlst = jsonDecode(response.body);
+          //     print(response.body);
+          //     productList = prodlst['data']['products'] as List;
+          //     print(productList.length);
+          //     if(productList.length > 0)
+          //     {
+          //       print("2. productList length: "+productList.length.toString());
+          //       productFlag = true;
+          //       setState(() {});
+          //     }
+          //     else if(productList.length == 0)
+          //     {
+          //       print("2. productList length: "+productList.length.toString());
+          //       productFlag = false;
+          //       setState(() {});
+          //     }
+          //   },
+          //child:  
+          BusinessFlashSale(pl: productList, catList: catList)
+        //)
+      // productFlag?UserFlashSale(pl: productList, catList: catList):
+      // Center(
+      //   child:RefreshIndicator(
+          
+      //     onRefresh: () async{
+      //         print("it is called");
+      //          if(catList.length == 0){
+      //           catList[0] = "nothing";
+      //         }
+      //         http.Response  response = await http.get('$path/product?category=${catList[0]}',);
+      //         Map<String, dynamic> prodlst = jsonDecode(response.body);
+      //         print(response.body);
+      //         productList = prodlst['data']['products'] as List;
+      //         print(productList.length);
+      //         if(productList.length > 0)
+      //         {
+      //           print("2. productList length: "+productList.length.toString());
+      //           productFlag = true;
+      //           setState(() {});
+      //         }
+      //         else if(productList.length == 0)
+      //         {
+      //           print("2. productList length: "+productList.length.toString());
+      //           productFlag = false;
+      //           setState(() {});
+      //         }
+      //       },
+      //     child: ListView(
+      //       physics: const AlwaysScrollableScrollPhysics(),
+      //       children: <Widget>[
+      //         Padding(
+      //           padding:  EdgeInsets.fromLTRB(size.width*0.15, size.height*0.4, size.width*0.0, size.height*0),
+      //           child: Text("Nothing added", style: TextStyle(color: Colors.black54, fontSize:size.height*0.05)
+      //             ),
+      //         ),
+      //       ],
+      //     ),
+      //   )
+      // )          
       // Column(
       //   children: [
       //     SizedBox(

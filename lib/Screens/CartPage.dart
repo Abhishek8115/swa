@@ -26,7 +26,7 @@ List<dynamic> pr = [];
 String token;
 var razorpay;
 String order_id;
-
+Map<String, dynamic> data ;
 class _CartPageState extends State<CartPage> {
   
   
@@ -48,7 +48,7 @@ class _CartPageState extends State<CartPage> {
     //print(result.body);
     if(result.statusCode == 200)
       {
-        Map<String, dynamic> data = jsonDecode(result.body);
+        data = jsonDecode(result.body);
         totalPrice = double.parse(data['data']['user']['cart']['totalPrice'].toString()) ;
         totalQuantity = data['data']['user']['cart']['totalQuantity'];
         cart = data['data']['user']['cart']['products'];
@@ -102,6 +102,7 @@ class _CartPageState extends State<CartPage> {
       pageBuilder: (context, animation1, animation2) {}
     );
     print(jsonEncode({
+        "orderTo":data['data']['user']['cart']['products'][0]['product']['user'],
         "products":pr,
         "totalQuantity": totalQuantity,
         "totalPrice": totalPrice,
@@ -113,6 +114,7 @@ class _CartPageState extends State<CartPage> {
         "Authorization": "Bearer $token",
       },
       body: jsonEncode({
+        "orderTo":data['data']['user']['cart']['products'][0]['product']['user'],
         'products':pr,
         'totalQuantity': totalQuantity,
         'totalPrice': totalPrice,
@@ -124,6 +126,10 @@ class _CartPageState extends State<CartPage> {
     temp = jsonDecode(result.body);
     order_id = temp['data']['razorpayOrder']['id'];
     print("Checkpoint 1");
+    // Future.delayed(Duration(milliseconds: 2000)).then((onValue){
+    //     Navigator.pop(context);
+    //   }
+    // );  
     await payRazor();
     // var options = {
     //   'key': '<YOUR_KEY_ID>',
@@ -435,32 +441,25 @@ class _CartPageState extends State<CartPage> {
             ),
           ),
 
-          Padding(
-            padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
-            child: Container(
-              height: 50,
-              decoration: BoxDecoration(
-
+          InkWell(
+             onTap: () async{
+              await placeOrder();
+            },
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+              child: Container(
+                height: 50,
+                decoration: BoxDecoration(
                   color: Color(0xff62319E),
                   borderRadius: BorderRadius.circular(10.0)),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  GestureDetector(
-                      child: Center(
-                        child: Text('Order',
-                            style: TextStyle(
-                              fontSize: 20,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Montserrat')),
-                      ),
-                      onTap: () async{
-                        await placeOrder();
-                        //Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentModePage()));
-                      }
-                  )
-                ],
+                child: Center(
+                  child: Text('Order',
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Montserrat')),
+                ),
               ),
             ),
           ),
