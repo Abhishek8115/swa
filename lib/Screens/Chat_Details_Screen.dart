@@ -46,27 +46,37 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
     
   }
   Future<void> initSocket(String identifier)async{
+    print("hemlo");
     Directory directory = await getApplicationDocumentsDirectory();
     File file3 = File('${directory.path}/token.txt');
     String token = await file3.readAsString();
-    final socket = await manager.createInstance(SocketOptions(
-      "https://food2swap.herokuapp.com/api/",
+    SocketIO socket = await manager.createInstance(SocketOptions(
+      "https://food2swap.herokuapp.com/api",
       query: {
         'Authorization': 'Bearer $token'
       },
       enableLogging: true,
       transports: [Transports.webSocket]
-    ));
+    ));    
+    print('reached here');
+    socket.onConnectTimeout.listen((data){
+      print("Error : ${data.toString()}");
+    });
+    socket.onConnectError.handleError((onError)=>print(onError));
+    socket.connect();
+    socket.onConnecting.listen((data)=> print("connecting"));
+    socket.isConnected().then((onValue)=> print(onValue.toString()));
     socket.onConnect.listen((data){
       print('Connected : ${data.toString()}');
     });
-    socket.
-    socket.onConnectError.listen((err){print(err.toString());});
+    socket.emit("message", ["hey there"]);
+    socket.isConnected().then((onValue)=> print(onValue.toString()));
   }
   @override
   void initState() {
     super.initState();
     manager = SocketIOManager();
+    initSocket("true");
   }
 
   @override
@@ -110,7 +120,6 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
               color: Colors.white,
               child: Row(
                 children: <Widget>[
-
                   Expanded(
                     child: TextField(
                       controller: typedMsg,
