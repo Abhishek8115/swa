@@ -249,7 +249,7 @@ class _LoginPageState extends State<LoginPage>
                   borderRadius: BorderRadius.circular(32),
                 ),
                 child: TextField(
-                  keyboardType: TextInputType.emailAddress,
+                  keyboardType: TextInputType.phone,
                     controller: username,
                     cursorColor: Color(0xff90E5BF),
                     decoration: InputDecoration(
@@ -376,12 +376,19 @@ class _LoginPageState extends State<LoginPage>
               // print("password: ${password.text}");
               // http.Response result = await getData(username.text, password.text);
               //if (result.contains("success!")) {
-              if(loginDetails['type'] == 'success'){
-                Directory directory = await getApplicationDocumentsDirectory();
-                File file = File('${directory.path}/token.txt');
-                await file.writeAsString(loginDetails['data']['token']);
-                File file2 = File('${directory.path}/userId.txt');
-                await file2.writeAsString(loginDetails['data']['userId']);
+              //print(loginDetails['type']);
+              if(loginDetails['type'] == 'success'){                
+                try {                 
+                  Directory directory = await getApplicationDocumentsDirectory();
+                  File file = File('${directory.path}/token.txt');
+                  await file.writeAsString(loginDetails['data']['token']);
+                  File file2 = File('${directory.path}/userId.txt');
+                  await file2.writeAsString(loginDetails['data']['userId']);
+                  print("reached here");
+                } on Exception catch (e) {
+                // TODO
+                print(e);
+                }
                 
                 // void loadProductDetails()async
                 // {

@@ -1,14 +1,23 @@
+import 'dart:convert';
+import 'dart:ffi';
+import 'package:adhara_socket_io/adhara_socket_io.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:swap/Models/chat_message.dart';
 import 'package:swap/Widgets/chat_bubble.dart';
-import 'package:swap/Widgets/chat_detail_page_appbar.dart';
-
+// import 'package:web_socket_channel/io.dart';
+// import 'package:web_socket_channel/web_socket_channel.dart';
+// import 'package:web_socket_channel/status.dart' as status;
+// import 'package:web_socket_channel/io.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+// import 'data.dart';
+// import 'package:socket_io_client/socket_io_client.dart' as IO;
 enum MessageType{
   Sender,
   Receiver,
 }
-
 
 class ChatDetailPage extends StatefulWidget{
   @override
@@ -17,7 +26,7 @@ class ChatDetailPage extends StatefulWidget{
 
 class _ChatDetailPageState extends State<ChatDetailPage> {
 
-
+  TextEditingController typedMsg = TextEditingController();
   List<ChatMessage> chatMessage = [
     ChatMessage(message: "Hi John", type: MessageType.Receiver),
     ChatMessage(message: "Hope you are doin good", type: MessageType.Receiver),
@@ -25,17 +34,59 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
     ChatMessage(message: "I'm fine, Working from home", type: MessageType.Receiver),
     ChatMessage(message: "Oh! Nice. Same here man", type: MessageType.Sender),
   ];
+  //WebSocketChannel _channel;
+  SocketIOManager manager;
+  Map<String, SocketIO> sockets = {};
+  final _isProbablyConnected = <String, bool>{};
+  void sendMessage(String message)async{
+    
+    // print("printing token");
+    // print("token :$token");
+    // print('reached here');
+    
+  }
+  Future<void> initSocket(String identifier)async{
+    Directory directory = await getApplicationDocumentsDirectory();
+    File file3 = File('${directory.path}/token.txt');
+    String token = await file3.readAsString();
+    final socket = await manager.createInstance(SocketOptions(
+      "https://food2swap.herokuapp.com/api/",
+      query: {
+        'Authorization': 'Bearer $token'
+      },
+      enableLogging: true,
+      transports: [Transports.webSocket]
+    ));
+    socket.onConnect.listen((data){
+      print('Connected : ${data.toString()}');
+    });
+    socket.
+    socket.onConnectError.listen((err){print(err.toString());});
+  }
+  @override
+  void initState() {
+    super.initState();
+    manager = SocketIOManager();
+  }
 
-
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    //_socket.close();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white70,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text("Chat", style: TextStyle(color: Colors.black)),
         elevation: 0,
-        automaticallyImplyLeading: false,
-        backgroundColor: Colors.white70,
+        automaticallyImplyLeading: true,
+        iconTheme: IconThemeData(
+          color: Colors.black,
+        ),
+        backgroundColor: Colors.purple[50],
       ),
       body: Stack(        
         children: <Widget>[
@@ -43,7 +94,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
             itemCount: chatMessage.length,
             shrinkWrap: true,
             padding: EdgeInsets.only(top: 10,bottom: 10),
-            physics: NeverScrollableScrollPhysics(),
+            physics: BouncingScrollPhysics(),
             itemBuilder: (context, index){
               return ChatBubble(
                 chatMessage: chatMessage[index],
@@ -62,6 +113,8 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
 
                   Expanded(
                     child: TextField(
+                      controller: typedMsg,
+                      //focusNode: FocusNode.
                       decoration: InputDecoration(
                           hintText: "Type message...",
                           hintStyle: TextStyle(color: Colors.grey.shade500),
@@ -78,7 +131,18 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
             child: Container(
               padding: EdgeInsets.only(right: 30,bottom: 50),
               child: FloatingActionButton(
-                onPressed: (){},
+                onPressed: (){
+                  // chatMessage.add(
+                  //   ChatMessage(
+                  //     message:typedMsg.text.trim(),
+                  //     type: MessageType.Sender )
+                  //   );
+                  //sendMessage(typedMsg.text);
+                  initSocket("true");
+                  setState(() {
+                    typedMsg.clear();
+                  });                  
+                },
                 child: Icon(Icons.send,color: Colors.white,),
                 backgroundColor: Colors.purple[300],
                 elevation: 0,

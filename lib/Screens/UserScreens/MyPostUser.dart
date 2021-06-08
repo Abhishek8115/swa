@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
 import 'package:swap/global.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 
 //List productList = [];
 class MyPosts_User extends StatefulWidget {
@@ -19,9 +21,20 @@ class MyPosts_UserState extends State<MyPosts_User> {
   var data;
   bool productFlag = false;
   Future<String> getData() async {
-    http.Response  response = await http.get('$path/product',);   
-    Map<String, dynamic> prodlst = jsonDecode(response.body);
-    widget.pl = prodlst['data']['products'] as List;
+    Directory directory = await getApplicationDocumentsDirectory(); 
+    File file3 = File('${directory.path}/token.txt');
+    String token = await file3.readAsString();
+    http.Response  response = await http.get('$path/product/my_products',
+      headers:{
+        "Content-Type": "application/json",
+        "Authorization":"Bearer $token"
+      }
+    );
+    Map<String, dynamic> prodlst = {};   
+    prodlst = jsonDecode(response.body);
+    print(prodlst);
+    List temp = prodlst['data']['products'];
+    widget.pl = temp;
     http.Response  result = await http.get('$path/category',);   
     Map<dynamic, dynamic> catlst = jsonDecode(result.body);
     print('getData called');

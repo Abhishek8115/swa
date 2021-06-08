@@ -320,13 +320,14 @@ class _UserDashboardState extends State<BusinessDashboard> {
                 pageBuilder: (context, animation1, animation2) {}
               );
               String token = await file3.readAsString();
-              print(token);
+              
               http.Response  response = await http.get('$path/product/my_products',
                 headers: {
                   "Content-Type": "application/json",
                   "Authorization": "Bearer $token"
                 }
               );
+              print("Reached here");
               Navigator.pop(context);
               Map<String, dynamic> prodlst = jsonDecode(response.body);
               print(prodlst['data']['products']);

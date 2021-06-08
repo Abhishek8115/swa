@@ -8,7 +8,6 @@ class User_Orders extends StatefulWidget {
   @override
   List orders;
   User_Orders({Key key, this.orders}): super(key: key);
-
   _User_OrdersState createState() => _User_OrdersState();
 }
 Size size ;
@@ -26,7 +25,7 @@ class _User_OrdersState extends State<User_Orders> {
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(
-          color: Colors.black, //change your color here
+          color: Colors.black, 
         ),
         backgroundColor: Colors.white,
         title: Text(
@@ -49,6 +48,7 @@ class _User_OrdersState extends State<User_Orders> {
                 padding: EdgeInsets.fromLTRB(size.width*0.02, size.height*0.02, size.width*0.02, 0),
                 child: GestureDetector(
                   onTap:(){
+                  print(widget.orders[index]);
                   Navigator.push(context,
                     MaterialPageRoute(
                       builder: (context) => OrderDetails(order: widget.orders[index])));

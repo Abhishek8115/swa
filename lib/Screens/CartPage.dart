@@ -31,7 +31,7 @@ class _CartPageState extends State<CartPage> {
   
   
   List cart = [];
-  double totalPrice;
+  double totalPrice = 0;
   int totalQuantity;
   bool fetchData = false;
   void getData()async{
@@ -46,6 +46,7 @@ class _CartPageState extends State<CartPage> {
         }
       );
     //print(result.body);
+    
     if(result.statusCode == 200)
       {
         data = jsonDecode(result.body);
@@ -54,10 +55,15 @@ class _CartPageState extends State<CartPage> {
         cart = data['data']['user']['cart']['products'];
         //print(cart);
         for (var item in cart) {
+          var result2 = await http.get("$path/product/${item['product']['_id']}");
+          Map<String, dynamic> t = {};
+          t = await jsonDecode(result2.body);
+          String ownerId = t['data']['product']['user']['_id'];
           Map<String, dynamic> temp = {};
           temp['product'] = item['product']['_id'];           
           print("So far so good");
           temp['quantity'] = item['product']['quantity']; 
+          temp['owner'] = ownerId;
           pr.add(temp);
         }
         print(pr);
@@ -443,7 +449,10 @@ class _CartPageState extends State<CartPage> {
 
           InkWell(
              onTap: () async{
-              await placeOrder();
+              if(totalPrice == 0)
+                print("Hemlo paisa to daalm lo");
+              else
+                await placeOrder();
             },
             child: Padding(
               padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
