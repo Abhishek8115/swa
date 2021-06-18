@@ -1,33 +1,41 @@
 {
   "project_info": {
-    "project_number": "98330400385",
-    "project_id": "swap-307908",
-    "storage_bucket": "swap-307908.appspot.com"
+    "project_number": "1071375715363",
+    "project_id": "foodswap-49799",
+    "storage_bucket": "foodswap-49799.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:98330400385:android:85f366e6fe418f9f0a1f80",
+        "mobilesdk_app_id": "1:1071375715363:android:0a91c37838e1fe90cb7596",
         "android_client_info": {
           "package_name": "com.example.swap"
         }
       },
       "oauth_client": [
         {
-          "client_id": "98330400385-0juetv9cq4t1paif7filk2qtdil9ob3b.apps.googleusercontent.com",
+          "client_id": "1071375715363-s8rc4mnb57q4itu8np40qf67d4nhsdf2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.swap",
+            "certificate_hash": "a1d5cf933912ccd7170765ab14910e0fa694eb16"
+          }
+        },
+        {
+          "client_id": "1071375715363-td3tototj2dos2qssb756g3ofmnbdvob.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAqXqI1WhIzYXWyvug4P1z2v713K0x2lH0"
+          "current_key": "AIzaSyBOS7LUziOeqB9w95LBt15m3j5VG4iFWoo"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "98330400385-0juetv9cq4t1paif7filk2qtdil9ob3b.apps.googleusercontent.com",
+              "client_id": "1071375715363-td3tototj2dos2qssb756g3ofmnbdvob.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

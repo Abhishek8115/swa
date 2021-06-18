@@ -20,7 +20,7 @@ class _User_OrdersState extends State<User_Orders> {
   } 
   @override
   Widget build(BuildContext context) {
-    print(widget.orders);
+    // print(widget.orders);
     size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(

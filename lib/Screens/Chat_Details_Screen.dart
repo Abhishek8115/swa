@@ -1,29 +1,23 @@
 import 'dart:convert';
-import 'dart:ffi';
-import 'package:adhara_socket_io/adhara_socket_io.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:swap/Models/chat_message.dart';
 import 'package:swap/Widgets/chat_bubble.dart';
-// import 'package:web_socket_channel/io.dart';
-// import 'package:web_socket_channel/web_socket_channel.dart';
-// import 'package:web_socket_channel/status.dart' as status;
-// import 'package:web_socket_channel/io.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
-// import 'data.dart';
-// import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:cloud_firestore/cloud_firestore.dart';
 enum MessageType{
   Sender,
   Receiver,
 }
+List messageData = [];
 
 class ChatDetailPage extends StatefulWidget{
   @override
+  String owner_id;
+  ChatDetailPage({Key key, this.owner_id}): super(key: key);
   _ChatDetailPageState createState() => _ChatDetailPageState();
 }
-
 class _ChatDetailPageState extends State<ChatDetailPage> {
 
   TextEditingController typedMsg = TextEditingController();
@@ -34,49 +28,71 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
     ChatMessage(message: "I'm fine, Working from home", type: MessageType.Receiver),
     ChatMessage(message: "Oh! Nice. Same here man", type: MessageType.Sender),
   ];
-  //WebSocketChannel _channel;
-  SocketIOManager manager;
-  Map<String, SocketIO> sockets = {};
-  final _isProbablyConnected = <String, bool>{};
-  void sendMessage(String message)async{
-    
-    // print("printing token");
-    // print("token :$token");
-    // print('reached here');
-    
+  Directory directory;
+  Stream message;
+  File file2;
+  String userId ;
+  String chatRoomId;
+  createChatRoom(ownerid) async{
+    // await getMetaData();
+    directory = await getApplicationDocumentsDirectory();
+    file2 = File('${directory.path}/userId.txt');
+    userId = await file2.readAsString();
+    print("userId :"+userId);
+    print("ownerId :"+widget.owner_id);
+    chatRoomId = getChatRoomId(userId, widget.owner_id);
+    List<String> users = [userId, ownerid];
+    Map<String, dynamic> chatRoomMap = {
+      "users": users,
+      "chatroomId": chatRoomId
+    };
+    Firestore.instance.collection('ChatRoom')
+      .document(chatRoomId)
+      .setData(chatRoomMap)
+      .catchError((onError)=> print(onError.toString()));
   }
-  Future<void> initSocket(String identifier)async{
-    print("hemlo");
-    Directory directory = await getApplicationDocumentsDirectory();
-    File file3 = File('${directory.path}/token.txt');
-    String token = await file3.readAsString();
-    SocketIO socket = await manager.createInstance(SocketOptions(
-      "https://food2swap.herokuapp.com/api",
-      query: {
-        'Authorization': 'Bearer $token'
-      },
-      enableLogging: true,
-      transports: [Transports.webSocket]
-    ));    
-    print('reached here');
-    socket.onConnectTimeout.listen((data){
-      print("Error : ${data.toString()}");
-    });
-    socket.onConnectError.handleError((onError)=>print(onError));
-    socket.connect();
-    socket.onConnecting.listen((data)=> print("connecting"));
-    socket.isConnected().then((onValue)=> print(onValue.toString()));
-    socket.onConnect.listen((data){
-      print('Connected : ${data.toString()}');
-    });
-    socket.emit("message", ["hey there"]);
-    socket.isConnected().then((onValue)=> print(onValue.toString()));
+  addConversationMessages( text){
+    chatRoomId  = getChatRoomId(userId, widget.owner_id);
+    Map<String, dynamic> messageMap = {
+      "message": text,
+      "sendBy": userId,
+      "time": DateTime.now().millisecondsSinceEpoch
+    };
+    Firestore.instance.collection("ChatRoom")
+      .document(chatRoomId)
+      .collection("chats")
+      .add(messageMap).catchError((onError)=> print(onError.toString()));
+  }
+  getConversationMessages(String chatRoomId)async {
+    return await Firestore.instance.collection("ChatRoom")
+      .document(chatRoomId)
+      .collection("chats")
+      .orderBy("time", descending: false)
+      .snapshots();
+  }
+
+  getChatRoomId(String a,String b){
+    print("a :"+ a);
+    print("b :"+b);
+    if(a.substring(0, 1).codeUnitAt(0) > b.substring(0, 1).codeUnitAt(0))
+      return "$b\_$a";
+    return "$a\_$b";
+  }
+  getMetaData()async{    
+    print("userId :"+userId);
+    print("ownerId :"+widget.owner_id);
   }
   @override
-  void initState() {
+  void initState() {    
+    // getMetaData();
+    createChatRoom( widget.owner_id);
+    getConversationMessages(chatRoomId).then((value){
+      setState(() {
+        message = value;
+        print(message.isEmpty);
+      });
+    });
     super.initState();
-    manager = SocketIOManager();
-    initSocket("true");
   }
 
   @override
@@ -100,16 +116,42 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
       ),
       body: Stack(        
         children: <Widget>[
-          ListView.builder(
-            itemCount: chatMessage.length,
-            shrinkWrap: true,
-            padding: EdgeInsets.only(top: 10,bottom: 10),
-            physics: BouncingScrollPhysics(),
-            itemBuilder: (context, index){
-              return ChatBubble(
-                chatMessage: chatMessage[index],
-              );
-            },
+          StreamBuilder(
+            stream: message,
+            builder: (context, snapshot){
+              
+              if(snapshot.data == null){ 
+                getConversationMessages(chatRoomId).then((value){
+                  setState(() {
+                    message = value;
+                    print(message.isEmpty);
+                  });
+                });
+                return Center(child: CircularProgressIndicator());
+              }
+              return ListView.builder(
+              itemCount: snapshot.data.documents.length,
+              shrinkWrap: true,
+              padding: EdgeInsets.only(top: 10,bottom: 10),
+              physics: BouncingScrollPhysics(), 
+              itemBuilder: (context, index){
+                // messageData.add({
+                //   "message": snapshot.data.documents[index].data["message"],
+                //   "userId": snapshot.data.documents[index].data['sendBy']
+                // });
+                chatMessage.add(ChatMessage(
+                  message: snapshot.data.documents[index].data["message"],
+                  type: userId == snapshot.data.documents[index].data['sendBy']? MessageType.Sender: MessageType.Receiver
+                  )
+                );
+                print("message : "+snapshot.data.documents[index].data["message"]);
+                return ChatBubble(chatMessage: ChatMessage(
+                  message: snapshot.data.documents[index].data["message"],
+                  type: userId == snapshot.data.documents[index].data['sendBy']? MessageType.Sender: MessageType.Receiver
+                  ));
+              },
+            );
+            }
           ),
           Align(
             alignment: Alignment.bottomLeft,
@@ -140,14 +182,16 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
             child: Container(
               padding: EdgeInsets.only(right: 30,bottom: 50),
               child: FloatingActionButton(
-                onPressed: (){
+                onPressed: ()async{
                   // chatMessage.add(
                   //   ChatMessage(
                   //     message:typedMsg.text.trim(),
                   //     type: MessageType.Sender )
                   //   );
                   //sendMessage(typedMsg.text);
-                  initSocket("true");
+                  //initSocket("true");
+                  // createChatRoom(userId, widget.owner_id);
+                  addConversationMessages(typedMsg.text);
                   setState(() {
                     typedMsg.clear();
                   });                  

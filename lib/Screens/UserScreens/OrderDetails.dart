@@ -23,6 +23,11 @@ class _OrderDetailsState extends State<OrderDetails> {
       step = 2;
     return step;    
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -134,8 +139,9 @@ class _OrderDetailsState extends State<OrderDetails> {
                 ),
                 InkWell(
                   onTap:(){
+                    print("printing order "+ widget.order['products'][0]['owner'].toString());
                     Navigator.push(context, MaterialPageRoute(
-                      builder: (context) => ChatDetailPage()
+                      builder: (context) => ChatDetailPage(owner_id: widget.order['products'][0]['owner'].toString())
                     )
                     );
                   },
