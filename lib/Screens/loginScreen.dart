@@ -83,7 +83,7 @@ class _LoginPageState extends State<LoginPage>
     Directory directory = await getApplicationDocumentsDirectory(); 
     File file2 = File('${directory.path}/userId.txt');
     File file3 = File('${directory.path}/token.txt');
-    
+    print("Reached here");
     String userId = await file2.readAsString();
     String token = await file3.readAsString();
     print("printing token : " +token);
@@ -108,7 +108,7 @@ class _LoginPageState extends State<LoginPage>
   }
 
   Future<http.Response> getData(String number, String password) async {
-    final response = await http.post('https://food2swap.herokuapp.com/api/auth/login_with_username',
+    final response = await http.post('https://goodforlowprice.herokuapp.com/api/auth/login_with_username',
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(
           {

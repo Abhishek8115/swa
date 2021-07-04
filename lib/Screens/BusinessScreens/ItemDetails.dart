@@ -25,8 +25,14 @@ class _ItemDetailState extends State<ItemDetail> {
             Container(
               height: size.height*0.3,
               width: size.width*1,
-              child: ClipRect(
-                child: Image.asset("assets/burger.png"),
+              child: ClipRRect(
+                // borderRadius: BorderRadius.circular(20),
+                child: FadeInImage.assetNetwork(
+                  placeholder: 'assets/Rhombus.gif',
+                  image: widget.details['image'],
+                  fit: BoxFit.cover,
+                  // height: size.height*0.16,
+                ),
               ),
             ),
             Padding(

@@ -261,17 +261,21 @@ class UserFlashSaleState extends State<UserFlashSale> {
                           children: <Widget>[
                             Padding(
                             padding: EdgeInsets.all(MediaQuery.of(context).size.width*0.0),
-                              child: Container(
-                                child: ClipRect(
-                                    
-                                    child: Image.asset('assets/burger.png',
-                                    height: size.height*0.15,
-                                    fit: BoxFit.contain,
-                                    )
-                                  // radius: size.height*0.06,
-                                  // backgroundImage: AssetImage('assets/burger.png'),
-                              ),
-                              ),
+                              child: Center(
+                                // height: size.height*15,
+                                child: Padding(
+                                  padding: EdgeInsets.fromLTRB(0, size.height*0.02, 0, 0),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(20),
+                                    child: FadeInImage.assetNetwork(
+                                      placeholder: 'assets/Rhombus.gif',
+                                      image: widget.pl[index]['image'],
+                                      fit: BoxFit.fill,
+                                      height: size.height*0.16,
+                                    ),
+                                  ),
+                                ),
+                                ),
                               ),
                               Container(
                                 height: size.height*0.06,

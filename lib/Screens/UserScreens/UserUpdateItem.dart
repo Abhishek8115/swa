@@ -7,6 +7,8 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'dart:convert';
 import 'package:toast/toast.dart';
+import 'package:swap/api.dart';
+import 'dart:typed_data';
 
 class UserUpdateItem extends StatefulWidget {
   @override
@@ -23,6 +25,8 @@ class _UserUpdateItemState extends State<UserUpdateItem> with TickerProviderStat
   PickedFile  _image;
   bool dateSelected = false;
   bool categorySelected = false;
+  int selectedIndex;
+  List<Map<String, dynamic>> categories = [];
   List<bool> flags = [
     false,
     false,
@@ -33,13 +37,15 @@ class _UserUpdateItemState extends State<UserUpdateItem> with TickerProviderStat
     false,
     false,
   ];
-  File image;  
+  PickedFile image;  
+  File pickedFile;
   String imageUrl;
+  String imageName;
   String dropdownValue;
   DateTime selectedDate;
   String selectedCategory ;
   String selectedDateString ;
-
+  Uint8List imgBytes;
   TextEditingController name = new TextEditingController();
   TextEditingController description = new TextEditingController();
   TextEditingController price = new TextEditingController();
@@ -75,7 +81,7 @@ class _UserUpdateItemState extends State<UserUpdateItem> with TickerProviderStat
     print(!dateSelected);
     print(!categorySelected);
     //print("selected category is : $selectedCategory");
-    if( quantity.text.isEmpty || name.text.isEmpty || description.text.isEmpty || price.text.isEmpty || !dateSelected || !categorySelected)
+    if( imageUrl== null || quantity.text.isEmpty || name.text.isEmpty || description.text.isEmpty || price.text.isEmpty || !dateSelected || !categorySelected)
     {
       return(
         Toast.show("Please fill each entry", context,
@@ -134,7 +140,7 @@ class _UserUpdateItemState extends State<UserUpdateItem> with TickerProviderStat
         "description": description.text.trim(),
         "price": dPrice,
         "category": selectedCategory,
-        "image": "data:image/jpeg;base64,GiQ7QDs0PyAAAA",
+        "image": imageUrl,
         "expiration": selectedDate.toIso8601String(),
         "quantity": int.parse(quantity.text.trim()),
       })  
@@ -184,11 +190,50 @@ class _UserUpdateItemState extends State<UserUpdateItem> with TickerProviderStat
   }
 
   _imgFromCamera() async {
-
-    PickedFile image = await ImagePicker.platform.pickImage(
-        source: ImageSource.camera, imageQuality: 50
+    image = await ImagePicker.platform.pickImage(
+      source: ImageSource.camera, imageQuality: 50
     );
-
+    if(image != null){
+      print(image.path);
+      pickedFile = File(image.path);
+      imgBytes = pickedFile.readAsBytesSync();
+      imageName = pickedFile.path.split('/').last;
+    }
+    showGeneralDialog(
+    barrierColor: Colors.black.withOpacity(0.5),
+    transitionBuilder: (context, a1, a2, widget) {
+      return Transform.scale(
+        scale: a1.value,
+        child: Opacity(
+          opacity: a1.value,
+          child: AlertDialog(
+          title:Row(
+            children:<Widget>[
+              CircularProgressIndicator(
+                backgroundColor: Colors.indigo, 
+                valueColor: _animationController.drive(ColorTween(begin: Colors.indigo, end: Colors.deepPurple[100])),                  
+                strokeWidth: 6.0,
+              ),
+              SizedBox(width: MediaQuery.of(context).size.width*0.1),
+              Text("Loading")
+            ]
+          )
+        ),
+        ),
+      );
+    },
+    transitionDuration: Duration(milliseconds: 300),
+    barrierDismissible: false,
+    barrierLabel: '',
+    context: context,
+    pageBuilder: (context, animation1, animation2) {}
+    );
+    print("The image is selected");
+    final response = await api.save(imageName, imgBytes);
+    imageUrl = response.downloadLink.toString();
+    print(response.downloadLink);
+    print("String : "+response.downloadLink.toString());
+    Navigator.pop(context);
     setState(() {
       flags[0]=true;
       _image = image;
@@ -196,9 +241,49 @@ class _UserUpdateItemState extends State<UserUpdateItem> with TickerProviderStat
   }
 
   _imgFromGallery() async {
-    PickedFile image = await  ImagePicker.platform.pickImage(
+    image = await  ImagePicker.platform.pickImage(
         source: ImageSource.gallery, imageQuality: 50
     );   
+    if(image != null){
+      print(image.path);
+      pickedFile = File(image.path);
+      imgBytes = pickedFile.readAsBytesSync();
+      imageName = pickedFile.path.split('/').last;
+    }
+    showGeneralDialog(
+    barrierColor: Colors.black.withOpacity(0.5),
+    transitionBuilder: (context, a1, a2, widget) {
+      return Transform.scale(
+        scale: a1.value,
+        child: Opacity(
+          opacity: a1.value,
+          child: AlertDialog(
+          title:Row(
+            children:<Widget>[
+              CircularProgressIndicator(
+                backgroundColor: Colors.indigo, 
+                valueColor: _animationController.drive(ColorTween(begin: Colors.indigo, end: Colors.deepPurple[100])),                  
+                strokeWidth: 6.0,
+              ),
+              SizedBox(width: MediaQuery.of(context).size.width*0.1),
+              Text("Loading")
+            ]
+          )
+        ),
+        ),
+      );
+    },
+    transitionDuration: Duration(milliseconds: 300),
+    barrierDismissible: false,
+    barrierLabel: '',
+    context: context,
+    pageBuilder: (context, animation1, animation2) {}
+    );
+    print("The image is selected");
+    final response = await api.save(imageName, imgBytes);
+    imageUrl = response.downloadLink.toString();
+    print(response.downloadLink);
+    Navigator.pop(context);
     setState(() {
       flags[0]=true;
       _image = image;
@@ -513,7 +598,7 @@ class _UserUpdateItemState extends State<UserUpdateItem> with TickerProviderStat
                             width: MediaQuery.of(context).size.width * 0.3,
                           ),
                           SizedBox(width: MediaQuery.of(context).size.width*0.05),
-                          Text("Product deleted")
+                          Text("Product Updated")
                         ]
                       )
                     ),

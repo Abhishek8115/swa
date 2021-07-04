@@ -8,6 +8,8 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:convert';
 import 'package:toast/toast.dart';
 import 'package:flutter/services.dart';
+import 'dart:typed_data';
+import 'package:swap/api.dart';
 
 class EditPost extends StatefulWidget {
   @override
@@ -16,6 +18,7 @@ class EditPost extends StatefulWidget {
 List<String> categoriesLists = [];
 class _EditPostState extends State<EditPost> with TickerProviderStateMixin {
 
+  // CloudApi api;
   AnimationController _animationController;
   File tempImage;
   PickedFile  _image;
@@ -33,13 +36,15 @@ class _EditPostState extends State<EditPost> with TickerProviderStateMixin {
     false,
     false,
   ];
-  File image;  
+  PickedFile image;  
+  File pickedFile;
   String imageUrl;
+  String imageName;
   String dropdownValue;
   DateTime selectedDate;
   String selectedCategory ;
   String selectedDateString ;
-
+  Uint8List imgBytes;
   TextEditingController name = new TextEditingController();
   TextEditingController description = new TextEditingController();
   TextEditingController price = new TextEditingController();
@@ -53,6 +58,10 @@ class _EditPostState extends State<EditPost> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    print("Called here");
+    // rootBundle.loadString('assets/credential.json').then((json){
+    //   api = CloudApi(json);
+    // });
     _animationController =
         AnimationController(duration: new Duration(seconds: 2), vsync: this);
     _animationController.repeat();
@@ -95,9 +104,6 @@ class _EditPostState extends State<EditPost> with TickerProviderStateMixin {
     var res = await http.get("$path/category");
     Map<String, dynamic> catList = await jsonDecode(res.body);
     List cat = catList['data']['categories'];
-    // Navigator.pop(context);
-    // Navigator.pop(context);
-    //int i = 0;
     categories.clear();
     for(var name in cat){
       Map<String, dynamic> temp = {"name": "$name['name']", "id": "$name['_id']"};
@@ -117,7 +123,7 @@ class _EditPostState extends State<EditPost> with TickerProviderStateMixin {
     print(!dateSelected);
     print(!categorySelected);
     //print("selected category is : $selectedCategory");
-    if( quantity.text.isEmpty || name.text.isEmpty || description.text.isEmpty || price.text.isEmpty || !dateSelected || !categorySelected)
+    if( imageUrl== null || quantity.text.isEmpty || name.text.isEmpty || description.text.isEmpty || price.text.isEmpty || !dateSelected || !categorySelected)
     {
       return(
         Toast.show("Please fill each entry", context,
@@ -175,7 +181,7 @@ class _EditPostState extends State<EditPost> with TickerProviderStateMixin {
         "description": description.text.trim(),
         "price": dPrice,
         "category": selectedCategory,
-        "image": "data:image/jpeg;base64,GiQ7QDs0PyAAAA",
+        "image": imageUrl,
         "expiration": selectedDate.toIso8601String(),
         "quantity": int.parse(quantity.text.trim()),
       })  
@@ -217,9 +223,8 @@ class _EditPostState extends State<EditPost> with TickerProviderStateMixin {
       pageBuilder: (context, animation1, animation2) {}
     );
     Future.delayed(Duration(milliseconds: 2000)).then((onValue)=>
-                Navigator.pop(context)
-                
-              );
+      Navigator.pop(context)      
+    );
     if (response.statusCode ==200) {
       return(
           Toast.show("Product Added ", context,
@@ -231,11 +236,50 @@ class _EditPostState extends State<EditPost> with TickerProviderStateMixin {
   }
 
   _imgFromCamera() async {
-
-    PickedFile image = await ImagePicker.platform.pickImage(
-        source: ImageSource.camera, imageQuality: 50
+    image = await ImagePicker.platform.pickImage(
+      source: ImageSource.camera, imageQuality: 50
     );
-
+    if(image != null){
+      print(image.path);
+      pickedFile = File(image.path);
+      imgBytes = pickedFile.readAsBytesSync();
+      imageName = pickedFile.path.split('/').last;
+    }
+    showGeneralDialog(
+    barrierColor: Colors.black.withOpacity(0.5),
+    transitionBuilder: (context, a1, a2, widget) {
+      return Transform.scale(
+        scale: a1.value,
+        child: Opacity(
+          opacity: a1.value,
+          child: AlertDialog(
+          title:Row(
+            children:<Widget>[
+              CircularProgressIndicator(
+                backgroundColor: Colors.indigo, 
+                valueColor: _animationController.drive(ColorTween(begin: Colors.indigo, end: Colors.deepPurple[100])),                  
+                strokeWidth: 6.0,
+              ),
+              SizedBox(width: MediaQuery.of(context).size.width*0.1),
+              Text("Loading")
+            ]
+          )
+        ),
+        ),
+      );
+    },
+    transitionDuration: Duration(milliseconds: 300),
+    barrierDismissible: false,
+    barrierLabel: '',
+    context: context,
+    pageBuilder: (context, animation1, animation2) {}
+    );
+    print("The image is selected");
+    final response = await api.save(imageName, imgBytes);
+    imageUrl = response.downloadLink.toString();
+    print(response.downloadLink);
+    print("String : "+response.downloadLink.toString());
+    Navigator.pop(context);
     setState(() {
       flags[0]=true;
       _image = image;
@@ -243,9 +287,49 @@ class _EditPostState extends State<EditPost> with TickerProviderStateMixin {
   }
 
   _imgFromGallery() async {
-    PickedFile image = await  ImagePicker.platform.pickImage(
+    image = await  ImagePicker.platform.pickImage(
         source: ImageSource.gallery, imageQuality: 50
     );   
+    if(image != null){
+      print(image.path);
+      pickedFile = File(image.path);
+      imgBytes = pickedFile.readAsBytesSync();
+      imageName = pickedFile.path.split('/').last;
+    }
+    showGeneralDialog(
+    barrierColor: Colors.black.withOpacity(0.5),
+    transitionBuilder: (context, a1, a2, widget) {
+      return Transform.scale(
+        scale: a1.value,
+        child: Opacity(
+          opacity: a1.value,
+          child: AlertDialog(
+          title:Row(
+            children:<Widget>[
+              CircularProgressIndicator(
+                backgroundColor: Colors.indigo, 
+                valueColor: _animationController.drive(ColorTween(begin: Colors.indigo, end: Colors.deepPurple[100])),                  
+                strokeWidth: 6.0,
+              ),
+              SizedBox(width: MediaQuery.of(context).size.width*0.1),
+              Text("Loading")
+            ]
+          )
+        ),
+        ),
+      );
+    },
+    transitionDuration: Duration(milliseconds: 300),
+    barrierDismissible: false,
+    barrierLabel: '',
+    context: context,
+    pageBuilder: (context, animation1, animation2) {}
+    );
+    print("The image is selected");
+    final response = await api.save(imageName, imgBytes);
+    imageUrl = response.downloadLink.toString();
+    print(response.downloadLink);
+    Navigator.pop(context);
     setState(() {
       flags[0]=true;
       _image = image;
@@ -473,7 +557,7 @@ class _EditPostState extends State<EditPost> with TickerProviderStateMixin {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  dateSelected?Center(child: Text('$selectedDateString')):Text("Tap to slect Date"),
+                  dateSelected?Center(child: Text('$selectedDateString')):Text("Tap to select expiration date"),
                   Icon(Icons.date_range_outlined)
                 ],
               ),

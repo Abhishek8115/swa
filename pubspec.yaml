@@ -29,8 +29,8 @@ dependencies:
   geolocator : ^6.1.13
   file_picker: ^1.9.0
   path_provider: 2.0.1
-  gcloud: ^0.7.3
-  googleapis_auth: ^0.2.12
+  gcloud: 
+  googleapis_auth: 
   mime: ^0.9.7
   webview_flutter: ^1.0.7
   url_launcher: ^5.7.10
@@ -80,7 +80,9 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+    - assets/Rhombus.gif
     - assets/credentials.json
+    - assets/credential.json
     - assets/devil.ico
     - assets/back.png
     - assets/bell.png

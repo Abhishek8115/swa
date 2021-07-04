@@ -167,7 +167,7 @@ class UserFlashSaleState extends State<BusinessFlashSale> {
                         http.Response  response = await http.get('$path/product?category=${widget.catList[index]['name'].toString()}');
                         Map<String, dynamic> prodlst = jsonDecode(response.body);
                         widget.pl = prodlst['data']['products'] as List;
-                        
+                        print(widget.pl);
                         if(widget.pl.length == 0)
                           print("The products are empty");
                         print(widget.pl);
@@ -202,6 +202,7 @@ class UserFlashSaleState extends State<BusinessFlashSale> {
             // CategoriesList(categories: widget.catList),
             widget.pl.length == 0?
             RefreshIndicator(
+              triggerMode: RefreshIndicatorTriggerMode.anywhere,
               onRefresh: () async{
                 print("It is called");
                 await getData(selectedIndex);
@@ -217,6 +218,7 @@ class UserFlashSaleState extends State<BusinessFlashSale> {
                 ),
             ):
             RefreshIndicator(
+              triggerMode: RefreshIndicatorTriggerMode.anywhere,
               onRefresh: ()async{
                 print("It is called");
                 await getData(selectedIndex);
@@ -258,96 +260,36 @@ class UserFlashSaleState extends State<BusinessFlashSale> {
                           color: Colors.white.withOpacity(0.7),
                           borderRadius: BorderRadius.circular(20)
                             ),
-                            child: Column(
+                          child: Column(
                           children: <Widget>[
                             Padding(
                             padding: EdgeInsets.all(MediaQuery.of(context).size.width*0.0),
-                              child: Container(
-                                child: ClipRect(
-                                    
-                                    child: Image.asset('assets/burger.png',
-                                    height: size.height*0.15,
-                                    fit: BoxFit.contain,
-                                    )
-                                  // radius: size.height*0.06,
-                                  // backgroundImage: AssetImage('assets/burger.png'),
-                              ),
-                              ),
-                              ),
-                              Container(
-                                height: size.height*0.06,
-                                //color: Colors.blue,
+                              child: Center(
+                                // height: size.height*15,
                                 child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(widget.pl[index]['name'],
-                                  maxLines:2,
-                                  style: TextStyle(fontSize:14,fontWeight: FontWeight.w500),),
+                                  padding: EdgeInsets.fromLTRB(0, size.height*0.02, 0, 0),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(20),
+                                    child: FadeInImage.assetNetwork(
+                                      placeholder: 'assets/Rhombus.gif',
+                                      image: widget.pl[index]['image'],
+                                      fit: BoxFit.fill,
+                                      height: size.height*0.16,
+                                    ),
+                                  ),
+                                ),
                                 ),
                               ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                children: <Widget>[
-                                  Padding(
-                                    padding: EdgeInsets.fromLTRB(size.width*0.1, 0, size.width*0.1, 0),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                      children: <Widget>[
-                                    //     Text.rich(TextSpan(
-                                    //   text: '\u20b9 200',
-                                    //   style: TextStyle(
-                                    //     color: Colors.grey,
-                                    //     decoration: TextDecoration.lineThrough,
-                                    //   )
-                                    // ),
-                                    // ),
-                                    
-                                    Text(widget.pl[index]['price'].toString(), style: TextStyle(
-                                      color: Colors.purple,
-                                      fontWeight: FontWeight.w600, 
-                                      fontSize: size.height*0.02))
-                                                ]
-                                              ),
-                                            ),
-                                          ],
-                                    ),
-                              // SizedBox(
-                              //   height: size.height*0.01
-                              // ),
-                              // Text("Add to Cart", style: TextStyle( fontSize: 15, fontWeight: FontWeight.w500, color: Colors.purple )),
-                              // Padding(
-                              //   padding: const EdgeInsets.all(8.0),
-                              //   child: Text.rich(
-                              //     TextSpan(
-                              //       //text: 'This is item cost',
-                              //       children:<TextSpan>[
-                              //         TextSpan(
-                              //           text: '\u20b9 200',
-                              //           style: TextStyle(
-                              //             color: Colors.grey,
-                              //             decoration: TextDecoration.lineThrough,
-                              //           )
-                              //         ),
-                              //         TextSpan(text: '\u20b9 100')
-                              //       ]
-                              //     )
-                              //   ),
-                              // ),
-                              Column(
-                            children: <Widget>[
-                              
-                              // SizedBox(
-                              //   height: size.height*0.02
-                              // ),
-                              // Container(                          
-                              //   height: size.height*0.05,
-                              //   width: size.width*0.4, 
-                              //   child: Text("This is my last hurrah",
-                              //   overflow:TextOverflow.clip,
-                              //   softWrap: true,style: TextStyle(fontSize:13,color: Colors.black45),),
-                              // )
-                            ],
-                              ),
-                          ],
+                              Text(widget.pl[index]['name'],
+                              maxLines:2,
+                              style: TextStyle(fontSize:14,fontWeight: FontWeight.w500),),
+                              Center(
+                                child: Text(widget.pl[index]['price'].toString(), style: TextStyle(
+                                  color: Colors.purple,
+                                  fontWeight: FontWeight.w600, 
+                                  fontSize: size.height*0.02)),
+                                ),                             
+                              ],
                             ),
                           ),
                       ),

@@ -1,2 +1,2 @@
 int selectedIndex = 0;
-String path = 'https://food2swap.herokuapp.com/api';
+String path = 'https://goodforlowprice.herokuapp.com/api';

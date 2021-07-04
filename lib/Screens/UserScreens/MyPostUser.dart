@@ -81,7 +81,6 @@ class MyPosts_UserState extends State<MyPosts_User> {
             },
           child: Column(
             children: <Widget>[
-              //CategoriesList(dummy),
               Expanded(
                 child: Container(
                   padding: EdgeInsets.fromLTRB(size.width*0.00, 0, 0, size.height*0.02),
@@ -94,11 +93,7 @@ class MyPosts_UserState extends State<MyPosts_User> {
                       crossAxisCount: 2,
                       childAspectRatio: 1
                       ),
-                    //physics: BouncingScrollPhysics(), 
-                    itemCount: 
-                    //widget.pl==null?
-                    widget.pl.length,
-                    //:widget.pl.length,//data == null ? 0 : data.length,
+                    itemCount: widget.pl.length,
                     itemBuilder: (BuildContext context, int index) {
                       return InkWell(
                         onTap: (){ 
@@ -126,63 +121,36 @@ class MyPosts_UserState extends State<MyPosts_User> {
                             borderRadius: BorderRadius.circular(20)
                               ),
                               child: Column(
-                            children: <Widget>[
-                              Padding(
-                              padding: EdgeInsets.all(MediaQuery.of(context).size.width*0.0),
-                                child: Container(
-                                  child: ClipRect(
-                                      
-                                      child: Image.asset('assets/burger.png',
-                                      height: size.height*0.15,
-                                      fit: BoxFit.contain,
-                                      )
-                                    // radius: size.height*0.06,
-                                    // backgroundImage: AssetImage('assets/burger.png'),
-                                ),
-                                ),
-                                ),
-                                Container(
-                                  height: size.height*0.06,
-                                  //color: Colors.blue,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(widget.pl[index]['name'],
-                                    maxLines:2,
-                                    style: TextStyle(fontSize:14,fontWeight: FontWeight.w500),),
+                          children: <Widget>[
+                            Padding(
+                            padding: EdgeInsets.all(MediaQuery.of(context).size.width*0.0),
+                              child: Center(
+                                // height: size.height*15,
+                                child: Padding(
+                                  padding: EdgeInsets.fromLTRB(0, size.height*0.02, 0, 0),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(20),
+                                    child: FadeInImage.assetNetwork(
+                                      placeholder: 'assets/Rhombus.gif',
+                                      image: widget.pl[index]['image'],
+                                      fit: BoxFit.cover,
+                                      height: size.height*0.16,
+                                    ),
                                   ),
                                 ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                  children: <Widget>[
-                                    Padding(
-                                      padding: EdgeInsets.fromLTRB(size.width*0.1, 0, size.width*0.1, 0),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                        children: <Widget>[
-                                      //     Text.rich(TextSpan(
-                                      //   text: '\u20b9 200',
-                                      //   style: TextStyle(
-                                      //     color: Colors.grey,
-                                      //     decoration: TextDecoration.lineThrough,
-                                      //   )
-                                      // ),
-                                      // ),
-                                      
-                                      Text(widget.pl[index]['price'].toString(), style: TextStyle(
-                                        color: Colors.purple,
-                                        fontWeight: FontWeight.w600, 
-                                        fontSize: size.height*0.02))
-                                                  ]
-                                                ),
-                                              ),
-                                            ],
-                                      ),
-                                Column(
-                              children: <Widget>[
-                              ],
                                 ),
-                            ],
                               ),
+                              Text(widget.pl[index]['name'],
+                              maxLines:2,
+                              style: TextStyle(fontSize:14,fontWeight: FontWeight.w500),),
+                              Center(
+                                child: Text(widget.pl[index]['price'].toString(), style: TextStyle(
+                                  color: Colors.purple,
+                                  fontWeight: FontWeight.w600, 
+                                  fontSize: size.height*0.02)),
+                                ),                             
+                              ],
+                            ),
                             ),
                         ),
                       );
@@ -193,19 +161,6 @@ class MyPosts_UserState extends State<MyPosts_User> {
             ],
           ),
         )
-        // :
-        // AlertDialog(
-        //     title:Row( 
-        //       children:<Widget>[
-        //         CircularProgressIndicator(
-        //           backgroundColor: Colors.lightBlue[100], 
-        //           strokeWidth: 6.0,
-        //         ),
-        //         SizedBox(width: size.width*0.1),
-        //         Text("Loading")
-        //       ]
-        //     )
-        //   ),
     );
   }
 }

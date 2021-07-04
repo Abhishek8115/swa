@@ -345,7 +345,7 @@ class _UserDashboardState extends State<UserDashboard> {
                     maxHeight: 30,
                   ),
                   child:
-                      Image.asset("assets/myposts.png", fit: BoxFit.cover),
+                    Image.asset("assets/myposts.png", fit: BoxFit.cover),
                 ),
                 title: Text("My Posts"),
               ),

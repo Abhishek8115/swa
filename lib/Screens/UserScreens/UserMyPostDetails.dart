@@ -123,14 +123,13 @@ class _UserPostItemDetailState extends State<UserPostItemDetail> {
     Future.delayed(Duration(milliseconds: 2000)).then((onValue){
       Navigator.pop(context);
       Navigator.pop(context);
-      Navigator.pop(context);   
-      print("All pops are called");     
+      Navigator.pop(context);      
     });  
                           
   }
   @override
   Widget build(BuildContext context) {
-    print(widget.details['price']);
+    // print(widget.details['price']);
     size = MediaQuery.of(context).size;
     return Scaffold(
       // appBar:AppBar(),
@@ -140,8 +139,14 @@ class _UserPostItemDetailState extends State<UserPostItemDetail> {
             Container(
               height: size.height*0.3,
               width: size.width*1,
-              child: ClipRect(
-                child: Image.asset("assets/burger.png"),
+              child: ClipRRect(
+                // borderRadius: BorderRadius.circular(20),
+                child: FadeInImage.assetNetwork(
+                  placeholder: 'assets/Rhombus.gif',
+                  image: widget.details['image'],
+                  fit: BoxFit.cover,
+                  // height: size.height*0.16,
+                ),
               ),
             ),
             Padding(
@@ -166,7 +171,7 @@ class _UserPostItemDetailState extends State<UserPostItemDetail> {
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
-                    Text("\u20b9 ${widget.details['price']}", style: TextStyle(
+                    Text("\$ ${widget.details['price']}", style: TextStyle(
                       color: Colors.purple,
                       fontWeight: FontWeight.w600, 
                       fontSize: size.height*0.04)),
